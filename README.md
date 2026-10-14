@@ -1,4 +1,4 @@
-# Incremental físico — Java 26.3 · v0.2.1
+# Incremental  — Java 26.3 · v1.0.0
 
 Generadores físicos que depositan objetos reales en el cofre de debajo. El menú se
 utiliza únicamente como tienda: no hay clicker, reservas personales ni barra permanente.
