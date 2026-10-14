@@ -1,0 +1,66 @@
+scoreboard objectives add inc.ui trigger
+scoreboard objectives add inc.used minecraft.used:minecraft.carrot_on_a_stick
+scoreboard objectives add inc.id dummy
+scoreboard objectives add inc.sel dummy
+scoreboard objectives add inc.cd dummy
+scoreboard objectives add inc.hud dummy
+scoreboard objectives add inc.amount dummy
+scoreboard objectives add inc.space dummy
+scoreboard objectives add inc.tmp dummy
+scoreboard objectives add inc.sys dummy
+scoreboard objectives add inc.owner dummy
+scoreboard objectives add inc.kind dummy
+scoreboard objectives add inc.bank0 dummy
+scoreboard objectives add inc.qty0 dummy
+scoreboard objectives add inc.price0 dummy
+scoreboard objectives add inc.pow0 dummy
+scoreboard objectives add inc.level0 dummy
+scoreboard objectives add inc.up0 dummy
+scoreboard objectives add inc.rate0 dummy
+scoreboard objectives add inc.bank1 dummy
+scoreboard objectives add inc.qty1 dummy
+scoreboard objectives add inc.price1 dummy
+scoreboard objectives add inc.pow1 dummy
+scoreboard objectives add inc.level1 dummy
+scoreboard objectives add inc.up1 dummy
+scoreboard objectives add inc.rate1 dummy
+scoreboard objectives add inc.bank2 dummy
+scoreboard objectives add inc.qty2 dummy
+scoreboard objectives add inc.price2 dummy
+scoreboard objectives add inc.pow2 dummy
+scoreboard objectives add inc.level2 dummy
+scoreboard objectives add inc.up2 dummy
+scoreboard objectives add inc.rate2 dummy
+scoreboard objectives add inc.bank3 dummy
+scoreboard objectives add inc.qty3 dummy
+scoreboard objectives add inc.price3 dummy
+scoreboard objectives add inc.pow3 dummy
+scoreboard objectives add inc.level3 dummy
+scoreboard objectives add inc.up3 dummy
+scoreboard objectives add inc.rate3 dummy
+scoreboard objectives add inc.bank4 dummy
+scoreboard objectives add inc.qty4 dummy
+scoreboard objectives add inc.price4 dummy
+scoreboard objectives add inc.pow4 dummy
+scoreboard objectives add inc.level4 dummy
+scoreboard objectives add inc.up4 dummy
+scoreboard objectives add inc.rate4 dummy
+scoreboard objectives add inc.bank5 dummy
+scoreboard objectives add inc.qty5 dummy
+scoreboard objectives add inc.price5 dummy
+scoreboard objectives add inc.pow5 dummy
+scoreboard objectives add inc.level5 dummy
+scoreboard objectives add inc.up5 dummy
+scoreboard objectives add inc.rate5 dummy
+scoreboard objectives add inc.bank6 dummy
+scoreboard objectives add inc.qty6 dummy
+scoreboard objectives add inc.price6 dummy
+scoreboard objectives add inc.pow6 dummy
+scoreboard objectives add inc.level6 dummy
+scoreboard objectives add inc.up6 dummy
+scoreboard objectives add inc.rate6 dummy
+scoreboard players add #next inc.sys 0
+scoreboard players set #clock inc.sys 0
+scoreboard players set #cap inc.sys 1000000000
+scoreboard players set #four inc.sys 4
+tellraw @a {"text":"Incremental cargado. Abre el menú: /trigger inc.ui set 1","color":"green"}
