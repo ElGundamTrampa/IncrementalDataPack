@@ -1,28 +1,59 @@
-"""Generate the Incremental datapack and its installable archive (Python 3.12)."""
+"""Build the physical Incremental datapack for Minecraft Java 26.3."""
 import json
 import re
+import shutil
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PACK = ROOT / 'Incremental'
-TIERS = [
-    ('dirt', 'Tierra', 'dirt', 16, 'gold'),
-    ('wood', 'Madera', 'oak_log', 256, 'yellow'),
-    ('stone', 'Piedra', 'cobblestone', 512, 'gray'),
-    ('iron', 'Hierro', 'iron_ingot', 1024, 'white'),
-    ('gold', 'Oro', 'gold_ingot', 2048, 'gold'),
-    ('diamond', 'Diamante', 'diamond', 4096, 'aqua'),
-    ('nether', 'Netherita', 'netherite_ingot', 8192, 'dark_purple'),
+# key, label, output, appearance, currency, price, shop page
+CATALOG = [
+    ('dirt', 'Tierra', 'dirt', 'dirt', 'dirt', 16, 1),
+    ('oak', 'Roble', 'oak_log', 'oak_log', 'dirt', 256, 1),
+    ('stone', 'Piedra', 'cobblestone', 'stone', 'oak', 512, 1),
+    ('iron', 'Hierro', 'iron_ingot', 'iron_block', 'stone', 1024, 1),
+    ('gold', 'Oro', 'gold_ingot', 'gold_block', 'iron', 2048, 1),
+    ('diamond', 'Diamante', 'diamond', 'diamond_block', 'gold', 4096, 1),
+    ('netherite', 'Netherita', 'netherite_ingot', 'netherite_block', 'diamond', 8192, 1),
+    ('coal', 'Carbón', 'coal', 'coal_block', 'stone', 128, 2),
+    ('copper', 'Cobre', 'copper_ingot', 'copper_block', 'stone', 256, 2),
+    ('redstone', 'Redstone', 'redstone', 'redstone_block', 'iron', 256, 2),
+    ('lapis', 'Lapislázuli', 'lapis_lazuli', 'lapis_block', 'iron', 256, 2),
+    ('emerald', 'Esmeralda', 'emerald', 'emerald_block', 'diamond', 256, 2),
+    ('obsidian', 'Obsidiana', 'obsidian', 'obsidian', 'diamond', 256, 2),
+    ('quartz', 'Cuarzo', 'quartz', 'quartz_block', 'obsidian', 128, 2),
+    ('glowstone', 'Piedra luminosa', 'glowstone', 'glowstone', 'quartz', 256, 3),
+    ('magma', 'Bloque de magma', 'magma_block', 'magma_block', 'obsidian', 128, 3),
+    ('sea_lantern', 'Linterna marina', 'sea_lantern', 'sea_lantern', 'emerald', 256, 3),
+    ('blue_ice', 'Hielo azul', 'blue_ice', 'blue_ice', 'sea_lantern', 256, 3),
+    ('wool', 'Lana', 'white_wool', 'white_wool', 'oak', 64, 3),
+    ('string', 'Hilo', 'string', 'white_wool', 'wool', 64, 3),
+    ('slime', 'Bloque de slime', 'slime_block', 'slime_block', 'string', 256, 3),
 ]
+WOODS = [('spruce', 'Abeto', 'spruce_log'), ('birch', 'Abedul', 'birch_log'),
+         ('jungle', 'Jungla', 'jungle_log'), ('acacia', 'Acacia', 'acacia_log'),
+         ('dark_oak', 'Roble oscuro', 'dark_oak_log'), ('mangrove', 'Mangle', 'mangrove_log'),
+         ('cherry', 'Cerezo', 'cherry_log'), ('pale_oak', 'Roble pálido', 'pale_oak_log'),
+         ('poplar', 'Álamo', 'poplar_log'), ('crimson', 'Carmesí', 'crimson_stem'),
+         ('warped', 'Distorsionada', 'warped_stem'), ('bamboo', 'Bambú', 'bamboo_block')]
+CATALOG += [(key, label, item, item, 'oak', 256, 4) for key, label, item in WOODS]
+BY_KEY = {row[0]: row for row in CATALOG}
+DIMENSIONS = ['minecraft:overworld', 'minecraft:the_nether', 'minecraft:the_end']
 
-def write(path, value):
-    target = PACK / path
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(value.rstrip() + '\n', encoding='utf-8')
+# Only this generated directory is recreated, never the workspace or hand-edited files.
+generated = (PACK / 'data').resolve()
+assert generated == ROOT / 'Incremental' / 'data' and generated.is_relative_to(ROOT)
+if generated.exists():
+    shutil.rmtree(generated)
 
 def js(value):
     return json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+
+def write(path, value):
+    p = PACK / path
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(value.rstrip() + '\n', encoding='utf-8')
 
 def fn(name, lines):
     write(f'data/inc/function/{name}.mcfunction', '\n'.join(lines))
@@ -30,180 +61,269 @@ def fn(name, lines):
 def txt(text, color='white', **extra):
     return dict(text=text, color=color, **extra)
 
-def score(obj):
-    return {'score': {'name': '@s', 'objective': obj}}
+def tell(text, color='white'):
+    return 'tellraw @s ' + js(txt(text, color))
 
 def button(text, action, color='green'):
-    return txt(text, color, click_event={'action': 'run_command', 'command': f'/trigger inc.ui set {action}'})
+    return txt(text, color, click_event={'action': 'run_command', 'command': f'/trigger inc.shop set {action}'})
 
-def tell(parts):
-    return 'tellraw @s ' + js(parts)
+def token(kind, label, extra_tags=()):
+    return {'minecraft:entity_data': {'id': 'minecraft:armor_stand', 'Invisible': True,
+        'Marker': True, 'NoGravity': True, 'Invulnerable': True, 'Silent': True,
+        'Tags': ['inc.new.' + kind, *extra_tags]}, 'minecraft:custom_data': {'inc_token': True},
+        'minecraft:custom_name': txt(label, 'gold', italic=False), 'minecraft:max_stack_size': 1,
+        'minecraft:lore': [txt('Colócalo agachado con clic derecho.', 'gray', italic=False)]}
 
-write('pack.mcmeta', js({'pack': {'description': 'Incremental · cadena de recursos · Java 26.3', 'min_format': [121, 0], 'max_format': [121, 0]}}))
-for tag in ('load', 'tick'):
+def token_loot(name, components):
+    write(f'data/inc/loot_table/{name}.json', js({'type': 'minecraft:generic', 'pools': [
+        {'rolls': 1, 'entries': [{'type': 'minecraft:item', 'name': 'minecraft:armor_stand',
+            'modifier': {'type': 'minecraft:set_components', 'components': components}}]}]}))
+
+write('pack.mcmeta', js({'pack': {'description': 'Incremental físico · Java 26.3 · v0.2.1',
+                                'min_format': [121, 0], 'max_format': [121, 0]}}))
+for tag in ['load', 'tick']:
     write(f'data/minecraft/tags/function/{tag}.json', js({'values': [f'inc:{tag}']}))
+for tag in ['pause_screen_additions', 'quick_actions']:
+    write(f'data/minecraft/tags/dialog/{tag}.json', js({'values': ['inc:shop/page1']}))
+write('data/inc/tags/block/chests.json', js({'values': ['minecraft:chest', 'minecraft:trapped_chest']}))
+# Deep chests drop their restorable token through our controller. Suppress only the
+# ordinary chest drop for this exact custom component to avoid producing two chests.
+write('data/minecraft/loot_table/blocks/chest.json', js({'type': 'minecraft:block', 'pools': [{
+    'rolls': 1, 'condition': {'type': 'minecraft:all_of', 'terms': [
+        {'type': 'minecraft:survives_explosion'}, {'type': 'minecraft:inverted', 'term': {
+            'type': 'minecraft:match_block', 'blocks': 'minecraft:chest',
+            'components': {'minecraft:custom_name': {'text': 'Cofre profundo', 'color': 'aqua'}}}}]},
+    'entries': [{'type': 'minecraft:item', 'name': 'minecraft:chest', 'modifier': {
+        'type': 'minecraft:copy_components', 'include': ['minecraft:custom_name'], 'source': 'block_entity'}}]}],
+    'random_sequence': 'minecraft:blocks/chest'}))
 
-objectives = {'inc.ui': 'trigger', 'inc.used': 'minecraft.used:minecraft.carrot_on_a_stick'}
-for key in ['id', 'sel', 'cd', 'hud', 'amount', 'space', 'tmp', 'sys', 'owner', 'kind']:
-    objectives['inc.' + key] = 'dummy'
-for i in range(7):
-    for key in ['bank', 'qty', 'price', 'pow', 'level', 'up', 'rate']:
-        objectives[f'inc.{key}{i}'] = 'dummy'
-fn('load', [f'scoreboard objectives add {key} {criterion}' for key, criterion in objectives.items()] + [
-    'scoreboard players add #next inc.sys 0',
-    'scoreboard players set #clock inc.sys 0',
-    'scoreboard players set #cap inc.sys 1000000000',
-    'scoreboard players set #four inc.sys 4',
-    'tellraw @a ' + js(txt('Incremental cargado. Abre el menú: /trigger inc.ui set 1', 'green')),
-])
+fn('setup', ['scoreboard objectives add inc.shop trigger'] +
+   [f'scoreboard objectives add inc.{obj} dummy' for obj in ['sys', 'id', 'kind', 'buf', 'amount', 'space', 'left', 'tmp', 'trace', 'mine', 'aim']] +
+   ['scoreboard players add #next inc.sys 0', 'data modify storage inc:meta physical set value 2'])
+fn('load', ['execute unless data storage inc:meta {physical:2} run function inc:setup',
+    'scoreboard players set #clock inc.sys 0', 'scoreboard players set #cap inc.sys 1000000000'] +
+    [f'execute in {dim} run kill @e[tag=inc.storage_part]' for dim in DIMENSIONS] +
+    [f'execute in {dim} as @e[type=minecraft:armor_stand,tag=inc.vault] at @s run function inc:vault/reposition_label' for dim in DIMENSIONS])
+fn('init', ['clear @s minecraft:carrot_on_a_stick[minecraft:custom_data~{inc_tool:1b}]',
+    'scoreboard players set @s inc.shop 0', 'scoreboard players set @s inc.mine 0', 'tag @s add inc.physical',
+    'loot give @s loot inc:tokens/gen/dirt', 'loot give @s loot inc:tokens/vault', 'give @s minecraft:chest 1',
+    tell('Coloca el cofre profundo en el suelo y el generador de tierra sobre él, agachado. Tienda: /trigger inc.shop set 1', 'green')])
+fn('tick', ['execute as @a[tag=!inc.physical] run function inc:init',
+    'execute as @a at @s unless score @s inc.shop matches 0 run function inc:shop/dispatch',
+    'scoreboard players enable @a inc.shop',
+    'execute as @a[tag=inc.physical,gamemode=!spectator] at @s run function inc:mining/start',
+    'execute as @a[tag=inc.physical,gamemode=spectator] run function inc:mining/clear'] +
+    [f'execute in {dim} as @e[type=minecraft:armor_stand,tag=inc.new.gen] at @s run function inc:gen/new' for dim in DIMENSIONS] +
+    [f'execute in {dim} as @e[type=minecraft:armor_stand,tag=inc.new.vault] at @s run function inc:vault/new' for dim in DIMENSIONS] +
+    ['scoreboard players add #clock inc.sys 1', 'execute if score #clock inc.sys matches 20.. run function inc:second'])
+fn('second', ['scoreboard players set #clock inc.sys 0'] +
+    [f'execute in {dim} as @e[type=minecraft:armor_stand,tag=inc.gen] at @s run function inc:gen/tick' for dim in DIMENSIONS] +
+    [f'execute in {dim} as @e[type=minecraft:armor_stand,tag=inc.vault] at @s run function inc:vault/tick' for dim in DIMENSIONS] +
+    [f'execute in {dim} run kill @e[tag=inc.storage_part]' for dim in DIMENSIONS])
 
-initial = ['scoreboard players add #next inc.sys 1', 'scoreboard players operation @s inc.id = #next inc.sys',
-           'scoreboard players set @s inc.sel 0', 'scoreboard players set @s inc.cd 0',
-           'scoreboard players set @s inc.hud 1', 'scoreboard players set @s inc.used 0',
-           'scoreboard players set @s inc.ui 0']
-for i, (_, _, _, price, _) in enumerate(TIERS):
-    for key, value in [('bank', 0), ('qty', int(i == 0)), ('price', price), ('pow', 1), ('level', 0), ('up', 32), ('rate', int(i == 0))]:
-        initial.append(f'scoreboard players set @s inc.{key}{i} {value}')
-fn('init', initial + ['tag @s add inc.ready', 'function inc:tool', 'function inc:menu'])
+fn('shop/dispatch', [f'execute if score @s inc.shop matches {page} run function inc:shop/page{page}' for page in range(1, 5)] +
+    [f'execute if score @s inc.shop matches {100+i} run function inc:shop/buy/{row[0]}' for i, row in enumerate(CATALOG)] +
+    ['execute if score @s inc.shop matches 10 run function inc:shop/vault', 'scoreboard players set @s inc.shop 0'])
+def dialog_button(label, action, tooltip=None):
+    result = {'label': label, 'width': 210, 'action': {'type': 'minecraft:run_command', 'command': f'trigger inc.shop set {action}'}}
+    if tooltip:
+        result['tooltip'] = tooltip
+    return result
 
-fn('tick', [
-    'execute as @a[tag=!inc.ready] run function inc:init',
-    'scoreboard players remove @a[scores={inc.cd=1..}] inc.cd 1',
-    'execute as @a[scores={inc.used=1..}] if items entity @s weapon.mainhand minecraft:carrot_on_a_stick[minecraft:custom_data~{inc_tool:1b}] run function inc:click',
-    'execute as @a[scores={inc.used=1..}] if items entity @s weapon.offhand minecraft:carrot_on_a_stick[minecraft:custom_data~{inc_tool:1b}] run function inc:click',
-    'scoreboard players set @a inc.used 0',
-    'execute as @a unless score @s inc.ui matches 0 run function inc:dispatch',
-    'scoreboard players enable @a inc.ui',
-    'scoreboard players add #clock inc.sys 1',
-    'execute if score #clock inc.sys matches 20.. run function inc:second',
-] + [f'execute in {d} as @e[type=minecraft:interaction,tag=inc.storage] at @s if data entity @s interaction run function inc:warehouse/interact' for d in ['minecraft:overworld', 'minecraft:the_nether', 'minecraft:the_end']])
-fn('second', ['scoreboard players set #clock inc.sys 0', 'execute as @a run function inc:produce', 'execute as @a[scores={inc.hud=1}] run function inc:hud'])
-produce = []
-for i in range(7):
-    produce += [f'scoreboard players operation @s inc.bank{i} += @s inc.rate{i}', f'scoreboard players operation @s inc.bank{i} < #cap inc.sys']
-fn('produce', produce)
+for page, title in enumerate(['Progresión', 'Recursos 1', 'Recursos 2', 'Maderas'], 1):
+    actions = [dialog_button(label, number) for number, label in enumerate(['Principal', 'Recursos 1', 'Recursos 2', 'Maderas'], 1)]
+    for i, row in enumerate(CATALOG):
+        key, label, item, block, currency, price, category = row
+        if category == page:
+            actions.append(dialog_button(label + ' · ' + f'{price:,}'.replace(',', '.') + ' ' + BY_KEY[currency][1], 100+i,
+                'Comprar un generador de ' + label + '. Produce un objeto por segundo en el cofre inferior.'))
+    actions.append(dialog_button('Cofre profundo · 64 hierro', 10))
+    write(f'data/inc/dialog/shop/page{page}.json', js({'type': 'minecraft:multi_action', 'title': 'Tienda · ' + title,
+        'external_title': 'Tienda de generadores', 'pause': False, 'after_action': 'close', 'columns': 2,
+        'body': {'type': 'minecraft:plain_message', 'width': 430,
+                 'contents': 'Pago con tu inventario y un cofre profundo del material a 8 bloques. Coloca los generadores sobre un cofre, agachado.'},
+        'actions': actions, 'exit_action': {'label': 'Cerrar', 'width': 210}}))
+    fn('shop/page' + str(page), [f'dialog show @s inc:shop/page{page}'])
 
-dispatch = []
-for action, name in [(1, 'menu'), (2, 'click'), (3, 'tool'), (4, 'toggle_hud'), (60, 'warehouse/request'), (61, 'warehouse/remove')]:
-    dispatch.append(f'execute if score @s inc.ui matches {action} run function inc:{name}')
-for i, (key, *_) in enumerate(TIERS):
-    for start, operation in [(10, 'select'), (20, 'buy'), (30, 'upgrade'), (40, 'deposit'), (50, 'withdraw')]:
-        dispatch.append(f'execute if score @s inc.ui matches {start+i} run function inc:tier/{key}/{operation}')
-fn('dispatch', dispatch + ['scoreboard players set @s inc.ui 0'])
-fn('toggle_hud', ['scoreboard players add @s inc.hud 1', 'execute if score @s inc.hud matches 2.. run scoreboard players set @s inc.hud 0', 'title @s actionbar ""'])
-fn('tool', [
-    'clear @s minecraft:carrot_on_a_stick[minecraft:custom_data~{inc_tool:1b}]',
-    'give @s minecraft:carrot_on_a_stick[minecraft:custom_data={inc_tool:1b},minecraft:custom_name={text:"Generador incremental",color:"green",italic:false},minecraft:lore=[{text:"Clic derecho: genera el recurso seleccionado.",italic:false},{text:"Menú: /trigger inc.ui set 1",italic:false}],minecraft:unbreakable={}] 1',
-])
-fn('click', ['execute if score @s inc.cd matches 1.. run return 0', 'scoreboard players set @s inc.cd 5'] + [f'execute if score @s inc.sel matches {i} run function inc:tier/{key}/click' for i, (key, *_) in enumerate(TIERS)])
-fn('hud', [f'execute if score @s inc.sel matches {i} run title @s actionbar ' + js([txt(name + ' · ', color), score(f'inc.bank{i}'), txt(' guardados | +'), score(f'inc.rate{i}'), txt('/s | Menú: /trigger inc.ui set 1', 'gray')]) for i, (_, name, _, _, color) in enumerate(TIERS)])
-
-menu = [tell([txt('━━ INCREMENTAL · ALMACENES ━━', 'gold')]),
-        tell([button('[GENERAR] ', 2), button('[HERRAMIENTA] ', 3, 'aqua'), button('[HUD] ', 4, 'gray')]),
-        tell([txt('Compra productores con el recurso anterior. Mejora con el propio.', 'gray')])]
-for i, (_, name, _, _, color) in enumerate(TIERS):
-    currency = TIERS[max(0, i-1)][1]
-    menu.append(tell([txt(name + ': ', color), score(f'inc.bank{i}'), txt(' | Generadores: '), score(f'inc.qty{i}'), txt(' | +'), score(f'inc.rate{i}'), txt('/s\n'),
-        button('[Seleccionar] ', 10+i, color), button('[Comprar: ', 20+i), score(f'inc.price{i}'), button(f' {currency}] ', 20+i),
-        button('[Mejorar: ', 30+i, 'yellow'), score(f'inc.up{i}'), button(f' {name}] ', 30+i, 'yellow'),
-        button('[Depositar] ', 40+i, 'aqua'), button('[Retirar 64]', 50+i, 'white')]))
-menu += [tell([button('[Colocar almacén del recurso seleccionado] ', 60, 'gold'), button('[Recoger tus almacenes cercanos]', 61, 'gray')]),
-         tell([txt('Clic derecho en el almacén: menú. Sus reservas son personales.\nRetirar deja objetos reales; deja espacio en el inventario.', 'gray')])]
-fn('menu', menu)
-
-for i, (key, name, item, _, color) in enumerate(TIERS):
-    base = f'tier/{key}'
-    prev = max(0, i-1)
-    fn(base + '/select', [f'execute if score @s inc.qty{i} matches 0 run return run ' + tell([txt('Primero compra este generador.', 'red')]), f'scoreboard players set @s inc.sel {i}', 'function inc:hud'])
-    fn(base + '/click', [f'scoreboard players operation @s inc.bank{i} += @s inc.pow{i}', f'scoreboard players operation @s inc.bank{i} < #cap inc.sys', 'function inc:hud'])
-    fn(base + '/buy', [
-        f'execute if score @s inc.qty{i} matches 50.. run return run ' + tell([txt('Límite: 50 generadores de este material.', 'yellow')]),
-        f'execute unless score @s inc.bank{prev} >= @s inc.price{i} run return run ' + tell([txt('Necesitas más ' + TIERS[prev][1] + ' en el almacén.', 'red')]),
-        f'scoreboard players operation @s inc.bank{prev} -= @s inc.price{i}',
-        f'scoreboard players add @s inc.qty{i} 1',
-        f'scoreboard players operation @s inc.tmp = @s inc.price{i}',
-        'scoreboard players operation @s inc.tmp /= #four inc.sys',
-        f'scoreboard players operation @s inc.price{i} += @s inc.tmp',
-        f'scoreboard players operation @s inc.price{i} < #cap inc.sys',
-        f'scoreboard players operation @s inc.rate{i} = @s inc.qty{i}',
-        f'scoreboard players operation @s inc.rate{i} *= @s inc.pow{i}',
-        f'scoreboard players set @s inc.sel {i}',
-        tell([txt('Generador de ' + name + ' comprado. ', 'green'), button('[Menú]', 1)]),
-    ])
-    fn(base + '/upgrade', [
-        f'execute if score @s inc.qty{i} matches 0 run return run ' + tell([txt('Primero compra este generador.', 'red')]),
-        f'execute if score @s inc.level{i} matches 10.. run return run ' + tell([txt('Mejora máxima: nivel 10.', 'yellow')]),
-        f'execute unless score @s inc.bank{i} >= @s inc.up{i} run return run ' + tell([txt('No tienes suficiente ' + name + ' guardado.', 'red')]),
-        f'scoreboard players operation @s inc.bank{i} -= @s inc.up{i}',
-        f'scoreboard players operation @s inc.up{i} += @s inc.up{i}',
-        f'scoreboard players operation @s inc.pow{i} += @s inc.pow{i}',
-        f'scoreboard players add @s inc.level{i} 1',
-        f'scoreboard players operation @s inc.rate{i} = @s inc.qty{i}',
-        f'scoreboard players operation @s inc.rate{i} *= @s inc.pow{i}',
-        tell([txt('Producción y clic de ' + name + ' duplicados. ', 'green'), button('[Menú]', 1)]),
-    ])
-    fn(base + '/deposit', [
-        f'execute store result score @s inc.amount run clear @s minecraft:{item} 0',
-        'scoreboard players operation @s inc.space = #cap inc.sys',
-        f'scoreboard players operation @s inc.space -= @s inc.bank{i}',
-        'scoreboard players operation @s inc.amount < @s inc.space',
-        'execute if score @s inc.amount matches 0 run return run ' + tell([txt('No hay objetos que depositar o el almacén está lleno.', 'yellow')]),
+def purchase(name, item, price, loot, confirmation):
+    currency_kind = next(i for i, row in enumerate(CATALOG) if row[2] == item)
+    bank = f'@e[type=minecraft:armor_stand,tag=inc.vault,scores={{inc.kind={currency_kind}}},distance=..8,sort=nearest,limit=1]'
+    fn(name, [f'execute store result score @s inc.amount run clear @s minecraft:{item} 0',
+        'scoreboard players set #reserve inc.tmp 0',
+        f'execute as {bank} at @s if block ~ ~ ~ minecraft:chest run function inc:vault/collect',
+        f'execute as {bank} at @s if block ~ ~ ~ minecraft:chest run scoreboard players operation #reserve inc.tmp = @s inc.buf',
+        'scoreboard players operation #funds inc.tmp = @s inc.amount', 'scoreboard players operation #funds inc.tmp += #reserve inc.tmp',
+        f'execute if score #funds inc.tmp matches ..{price-1} run return run function inc:{name}_fail',
+        f'scoreboard players set @s inc.tmp {price}', 'scoreboard players operation @s inc.amount < @s inc.tmp',
         'execute store result storage inc:runtime amount int 1 run scoreboard players get @s inc.amount',
-        f'function inc:{base}/deposit_amount with storage inc:runtime',
-        f'scoreboard players operation @s inc.bank{i} += @s inc.amount',
-        tell([txt('Depositado: ', 'aqua'), score('inc.amount'), txt(' de ' + name + '. '), button('[Menú]', 1)]),
-    ])
-    fn(base + '/deposit_amount', [f'$execute store result score @s inc.amount run clear @s minecraft:{item} $(amount)'])
-    fn(base + '/withdraw', [
-        f'execute if score @s inc.bank{i} matches 0 run return run ' + tell([txt('El almacén está vacío.', 'yellow')]),
-        f'scoreboard players operation @s inc.amount = @s inc.bank{i}',
-        'scoreboard players set @s inc.tmp 64',
+        f'execute if score @s inc.amount matches 1.. run function inc:{name}_pay with storage inc:runtime',
+        f'scoreboard players set #due inc.tmp {price}', 'scoreboard players operation #due inc.tmp -= @s inc.amount',
+        f'execute if score #due inc.tmp matches 1.. run scoreboard players operation {bank} inc.buf -= #due inc.tmp',
+        f'execute as {bank} at @s if block ~ ~ ~ minecraft:chest run function inc:vault/tick',
+        'loot give @s loot inc:' + loot, tell(confirmation, 'green')])
+    fn(name + '_pay', [f'$execute store result score @s inc.amount run clear @s minecraft:{item} $(amount)'])
+    fn(name + '_fail', [f'execute as {bank} at @s if block ~ ~ ~ minecraft:chest run function inc:vault/tick',
+        tell(f'Necesitas {price} de minecraft:{item} entre tu inventario y un cofre profundo cercano.', 'red')])
+
+for key, label, item, block, currency, price, page in CATALOG:
+    token_loot('tokens/gen/' + key, token('gen', 'Generador de ' + label, ['inc.type.' + key]))
+    write(f'data/inc/loot_table/output/{key}.json', js({'type': 'minecraft:generic', 'pools': [
+        {'rolls': 1, 'entries': [{'type': 'minecraft:item', 'name': 'minecraft:' + item}]}]}))
+    purchase('shop/buy/' + key, BY_KEY[currency][2], price, 'tokens/gen/' + key,
+             'Generador comprado. Colócalo sobre un cofre, agachado.')
+token_loot('tokens/vault', token('vault', 'Cofre profundo'))
+purchase('shop/vault', 'iron_ingot', 64, 'tokens/vault', 'Cofre profundo comprado. Colócalo en el suelo, agachado.')
+
+fn('entity/id', ['scoreboard players add #next inc.sys 1', 'scoreboard players operation @s inc.id = #next inc.sys'])
+fn('entity/display_id', ['tag @s add inc.part', 'scoreboard players operation @s inc.id = #id inc.tmp'])
+fn('entity/cleanup', ['scoreboard players operation #id inc.tmp = @s inc.id',
+    'execute as @e[tag=inc.part,distance=..3] if score @s inc.id = #id inc.tmp run kill @s'])
+# The item places an invisible armor stand. Its exact placement avoids guessing the
+# target with a raycast or overwriting another player's nearby block.
+fn('gen/new', ['function inc:entity/id'] + [f'execute if entity @s[tag=inc.type.{key}] run scoreboard players set @s inc.kind {i}' for i, (key, *_) in enumerate(CATALOG)] +
+    ['execute if block ~ ~ ~ #inc:chests align xyz positioned ~0.5 ~1 ~0.5 run return run function inc:gen/place',
+     'execute if block ~ ~-1 ~ #inc:chests align xyz positioned ~0.5 ~ ~0.5 run return run function inc:gen/place',
+     'function inc:gen/refund'])
+# Native armor stand placement can put its feet on the lid, Y + 0.875.
+# Snap both the execution position and entity to the block above the chest.
+fn('gen/place', ['execute unless block ~ ~ ~ minecraft:air run return run function inc:gen/refund',
+     'tp @s ~ ~ ~',
+     'tag @s remove inc.new.gen', 'tag @s add inc.gen', 'setblock ~ ~ ~ minecraft:glass',
+     'scoreboard players operation #id inc.tmp = @s inc.id'] +
+    [f'execute if score @s inc.kind matches {i} run function inc:gen/setup/{key}' for i, (key, *_) in enumerate(CATALOG)])
+for key, label, item, block, *_ in CATALOG:
+    fn('gen/setup/' + key, ['execute positioned ~-0.5 ~ ~-0.5 summon minecraft:block_display run function inc:gen/display/' + key])
+    fn('gen/display/' + key, ['function inc:entity/display_id', 'data merge entity @s {block_state:{Name:"minecraft:' + block +
+        '"},transformation:{translation:[0.05f,0.05f,0.05f],scale:[0.9f,0.9f,0.9f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f]}}'])
+fn('gen/refund', [f'execute if score @s inc.kind matches {i} run loot spawn ~ ~ ~ loot inc:tokens/gen/{key}' for i, (key, *_) in enumerate(CATALOG)] +
+    ['function inc:entity/cleanup', 'kill @s'])
+fn('gen/tick', ['execute unless block ~ ~ ~ minecraft:glass run return run function inc:gen/refund',
+    'execute unless block ~ ~-1 ~ #inc:chests run return 0', 'scoreboard players operation #kind inc.tmp = @s inc.kind',
+    'execute positioned ~ ~-1 ~ if entity @e[type=minecraft:armor_stand,tag=inc.vault,distance=..0.1] run return run function inc:gen/to_vault'] +
+    [f'execute if score @s inc.kind matches {i} run loot insert ~ ~-1 ~ loot inc:output/{key}' for i, (key, *_) in enumerate(CATALOG)])
+fn('gen/to_vault', ['execute as @e[type=minecraft:armor_stand,tag=inc.vault,distance=..0.1,limit=1] run function inc:vault/accept'])
+fn('vault/accept', ['execute if score @s inc.kind matches -1 run scoreboard players operation @s inc.kind = #kind inc.tmp',
+    'execute unless score @s inc.kind = #kind inc.tmp run return 0',
+    'execute if score @s inc.buf < #cap inc.sys run scoreboard players add @s inc.buf 1'])
+
+fn('vault/new', ['execute store result score @s inc.tmp run data get entity @s DisabledSlots',
+    'execute unless block ~ ~ ~ minecraft:air run return run function inc:vault/refund_new',
+    'execute if score @s inc.tmp matches 1.. run return run function inc:vault/restore_start',
+    'function inc:entity/id', 'scoreboard players set @s inc.kind -1', 'scoreboard players set @s inc.buf 0', 'function inc:vault/setup'])
+fn('vault/refund_new', ['execute if score @s inc.tmp matches 1.. run return run function inc:vault/refund_restored',
+    'loot spawn ~ ~ ~ loot inc:tokens/vault', 'kill @s'])
+fn('vault/refund_restored', ['execute store result storage inc:runtime id int 1 run scoreboard players get @s inc.tmp',
+    'function inc:vault/drop_token with storage inc:runtime', 'kill @s'])
+fn('vault/restore_start', ['execute store result storage inc:runtime id int 1 run scoreboard players get @s inc.tmp', 'function inc:vault/restore with storage inc:runtime'])
+fn('vault/restore', ['$execute if data storage inc:vaults v$(id){placed:1b} run return run kill @s',
+    '$scoreboard players set @s inc.id $(id)', '$execute store result score @s inc.kind run data get storage inc:vaults v$(id).kind',
+    '$execute store result score @s inc.buf run data get storage inc:vaults v$(id).amount', 'function inc:vault/setup'])
+fn('vault/setup', ['tag @s remove inc.new.vault', 'tag @s add inc.vault',
+    'setblock ~ ~ ~ minecraft:chest[facing=north,type=single,waterlogged=false]',
+    'data merge block ~ ~ ~ {CustomName:{text:"Cofre profundo",color:"aqua"}}', 'scoreboard players operation #id inc.tmp = @s inc.id',
+    'execute positioned ~ ~0.3 ~-0.7 summon minecraft:text_display run function inc:vault/display', 'function inc:vault/save'])
+fn('vault/display', ['function inc:entity/display_id', 'data merge entity @s {billboard:"center",background:0,shadow:1b,text:{text:"Cofre profundo · vacío",color:"aqua"}}'])
+fn('vault/reposition_label', ['scoreboard players operation #id inc.tmp = @s inc.id',
+    'execute as @e[type=minecraft:text_display,tag=inc.part,distance=..3] if score @s inc.id = #id inc.tmp run tp @s ~ ~0.3 ~-0.7'])
+fn('vault/collect', [f'execute if items block ~ ~ ~ container.{slot} * run function inc:vault/slot/{slot}' for slot in range(27)])
+fn('vault/tick', ['execute unless block ~ ~ ~ minecraft:chest run return run function inc:vault/break', 'function inc:vault/reposition_label', 'function inc:vault/collect'] +
+    ['execute if score @s inc.kind matches -1 run return 0', 'scoreboard players operation #id inc.tmp = @s inc.id',
+     'execute store result storage inc:runtime total int 1 run scoreboard players get @s inc.buf'] +
+    [f'execute if score @s inc.kind matches {i} run function inc:vault/output/{key}' for i, (key, *_) in enumerate(CATALOG)] + ['function inc:vault/save'])
+for slot in range(27):
+    fn(f'vault/slot/{slot}', [f'data modify storage inc:runtime probe set from block ~ ~ ~ Items[{{Slot:{slot}b}}]',
+        'data remove storage inc:runtime probe.Slot', 'data remove storage inc:runtime probe.count',
+        'scoreboard players set @s inc.tmp 0', 'execute store result score @s inc.tmp run data get storage inc:runtime probe.components',
+        'execute if score @s inc.tmp matches 0 run data remove storage inc:runtime probe.components',
+        f'data modify storage inc:runtime slot set value {slot}',
+        'function inc:vault/scan with storage inc:runtime'])
+scan = []
+for i, (key, label, item, *_) in enumerate(CATALOG):
+    scan.append(f'$execute if items block ~ ~ ~ container.$(slot) minecraft:{item} run return run function inc:vault/check/{key} with storage inc:runtime')
+scan.append('function inc:vault/eject with storage inc:runtime')
+fn('vault/scan', scan)
+for i, (key, label, item, *_) in enumerate(CATALOG):
+    fn('vault/check/' + key, [f'data modify storage inc:runtime reference set value {{id:"minecraft:{item}"}}',
+        'execute store success score @s inc.tmp run data modify storage inc:runtime reference set from storage inc:runtime probe',
+        'execute if score @s inc.tmp matches 1 run return run function inc:vault/eject with storage inc:runtime',
+        f'execute if score @s inc.kind matches -1 run scoreboard players set @s inc.kind {i}',
+        f'execute unless score @s inc.kind matches {i} run return run function inc:vault/eject with storage inc:runtime',
+        'function inc:vault/deposit with storage inc:runtime'])
+fn('vault/deposit', ['$execute store result score @s inc.amount run data get block ~ ~ ~ Items[{Slot:$(slot)b}].count',
+    'scoreboard players operation @s inc.left = @s inc.amount', 'scoreboard players operation @s inc.space = #cap inc.sys',
+    'scoreboard players operation @s inc.space -= @s inc.buf', 'scoreboard players operation @s inc.amount < @s inc.space',
+    'scoreboard players operation @s inc.left -= @s inc.amount', 'scoreboard players operation @s inc.buf += @s inc.amount',
+    '$execute if score @s inc.left matches 0 run return run item replace block ~ ~ ~ container.$(slot) with minecraft:air',
+    'execute store result storage inc:runtime left int 1 run scoreboard players get @s inc.left', 'function inc:vault/left with storage inc:runtime'])
+fn('vault/left', ['$data modify block ~ ~ ~ Items[{Slot:$(slot)b}].count set value $(left)'])
+fn('vault/eject', ['$data modify storage inc:runtime stack set from block ~ ~ ~ Items[{Slot:$(slot)b}]',
+    'function inc:vault/eject_stack with storage inc:runtime', '$item replace block ~ ~ ~ container.$(slot) with minecraft:air'])
+fn('vault/eject_stack', ['$summon minecraft:item ~ ~1 ~ {PickupDelay:20s,Item:$(stack)}'])
+for key, label, item, *_ in CATALOG:
+    fn('vault/output/' + key, ['scoreboard players operation @s inc.amount = @s inc.buf', 'scoreboard players set @s inc.tmp 64',
         'scoreboard players operation @s inc.amount < @s inc.tmp',
-        'execute store result storage inc:runtime amount int 1 run scoreboard players get @s inc.amount',
-        f'function inc:{base}/withdraw_amount with storage inc:runtime',
-    ])
-    fn(base + '/withdraw_amount', [f'$execute store success score @s inc.tmp run give @s minecraft:{item} $(amount)', f'execute if score @s inc.tmp matches 1 run scoreboard players operation @s inc.bank{i} -= @s inc.amount', tell([txt('Retirada solicitada: ', 'aqua'), score('inc.amount'), txt(' de ' + name + '. '), button('[Menú]', 1)])])
+        'execute unless items block ~ ~ ~ container.0 * run function inc:vault/prepare/' + key,
+        'function inc:vault/label/' + key + ' with storage inc:runtime'])
+    fn('vault/prepare/' + key, ['execute store result storage inc:runtime amount int 1 run scoreboard players get @s inc.amount',
+        'execute if score @s inc.amount matches 1.. run function inc:vault/fill/' + key + ' with storage inc:runtime'])
+    fn('vault/fill/' + key, [f'$execute store success score @s inc.tmp run item replace block ~ ~ ~ container.0 with minecraft:{item} $(amount)',
+        'execute if score @s inc.tmp matches 1 run scoreboard players operation @s inc.buf -= @s inc.amount'])
+    fn('vault/label/' + key, ['$execute as @e[type=minecraft:text_display,tag=inc.part,distance=..2] if score @s inc.id = #id inc.tmp run data merge entity @s {text:{text:"' + label + ' · $(total) guardados",color:"aqua"}}'])
+fn('vault/save', ['execute store result storage inc:runtime id int 1 run scoreboard players get @s inc.id',
+    'execute store result storage inc:runtime amount int 1 run scoreboard players get @s inc.buf',
+    'execute store result storage inc:runtime kind int 1 run scoreboard players get @s inc.kind', 'function inc:vault/save_values with storage inc:runtime'])
+fn('vault/save_values', ['$data modify storage inc:vaults v$(id) set value {amount:$(amount),kind:$(kind),placed:1b}'])
+fn('vault/break', ['function inc:vault/save', 'function inc:vault/unplace with storage inc:runtime',
+    'function inc:vault/drop_token with storage inc:runtime', 'function inc:entity/cleanup', 'kill @s'])
+fn('vault/unplace', ['$data modify storage inc:vaults v$(id).placed set value 0b'])
+fn('vault/drop_token', ['$summon minecraft:item ~ ~ ~ {PickupDelay:20s,Item:{id:"minecraft:armor_stand",count:1,components:{"minecraft:max_stack_size":1,"minecraft:custom_data":{inc_token:1b},"minecraft:custom_name":{text:"Cofre profundo recuperado",color:"aqua",italic:0b},"minecraft:entity_data":{id:"minecraft:armor_stand",Invisible:1b,Marker:1b,NoGravity:1b,Invulnerable:1b,Silent:1b,DisabledSlots:$(id),Tags:["inc.new.vault"]}}}}'])
 
-fn('warehouse/request', [
-    'scoreboard players operation #owner inc.tmp = @s inc.id',
-    'scoreboard players operation #kind inc.tmp = @s inc.sel',
-    'execute at @s positioned ^ ^ ^2 align xyz if block ~ ~ ~ minecraft:air if block ~ ~1 ~ minecraft:air run return run function inc:warehouse/place',
-    tell([txt('Busca dos bloques de aire delante de ti para colocar el almacén.', 'yellow')]),
-])
-fn('warehouse/place', [
-    'execute as @e[tag=inc.storage_part] if score @s inc.owner = #owner inc.tmp if score @s inc.kind = #kind inc.tmp run kill @s',
-    'execute summon minecraft:block_display run function inc:warehouse/display',
-    'execute positioned ~0.5 ~ ~0.5 summon minecraft:interaction run function inc:warehouse/hitbox',
-    'execute positioned ~0.5 ~1.15 ~0.5 summon minecraft:text_display run function inc:warehouse/label',
-    tell([txt('Almacén colocado. Clic derecho para abrirlo. ', 'green'), button('[Menú]', 1)]),
-])
-owner = ['tag @s add inc.storage_part', 'scoreboard players operation @s inc.owner = #owner inc.tmp', 'scoreboard players operation @s inc.kind = #kind inc.tmp']
-fn('warehouse/display', owner + ['data merge entity @s {block_state:{Name:"minecraft:barrel",Properties:{facing:"up",open:"false"}}}'])
-fn('warehouse/hitbox', owner + ['tag @s add inc.storage', 'data merge entity @s {width:1.0f,height:1.0f,response:1b}'])
-fn('warehouse/label', owner + ['data merge entity @s {billboard:"center",background:0,shadow:1b}'] + [f'execute if score @s inc.kind matches {i} run data merge entity @s ' + '{text:' + js(txt('Almacén de ' + name, color)) + '}' for i, (_, name, _, _, color) in enumerate(TIERS)])
-fn('warehouse/interact', [
-    'scoreboard players operation #owner inc.tmp = @s inc.owner',
-    'scoreboard players operation #kind inc.tmp = @s inc.kind',
-    'execute on target if score @s inc.id = #owner inc.tmp run function inc:warehouse/open',
-    'execute on target unless score @s inc.id = #owner inc.tmp run ' + tell([txt('Este almacén pertenece a otro jugador.', 'yellow')]),
-    'data remove entity @s interaction',
-])
-fn('warehouse/open', ['scoreboard players operation @s inc.sel = #kind inc.tmp', 'function inc:menu'])
-fn('warehouse/remove', ['scoreboard players operation #owner inc.tmp = @s inc.id', 'execute at @s as @e[tag=inc.storage_part,distance=..32] if score @s inc.owner = #owner inc.tmp run kill @s', tell([txt('Almacenes cercanos recogidos. Los recursos se conservan.', 'green')])])
+# Hardness groups are checked against the installed 26.3 engine by Validate.java.
+MINING = {
+    1: (1.25, ['basalt', 'polished_basalt', 'smooth_basalt']),
+    2: (1.5, ['blackstone', 'blackstone_stairs', 'blackstone_wall', 'gilded_blackstone', 'polished_blackstone_bricks', 'polished_blackstone_brick_stairs', 'polished_blackstone_brick_wall', 'cracked_polished_blackstone_bricks', 'chiseled_polished_blackstone']),
+    3: (2.0, ['blackstone_slab', 'polished_blackstone', 'polished_blackstone_slab', 'polished_blackstone_stairs', 'polished_blackstone_wall', 'polished_blackstone_brick_slab']),
+    4: (3.0, ['deepslate']),
+    5: (3.5, ['polished_deepslate', 'polished_deepslate_slab', 'polished_deepslate_stairs', 'polished_deepslate_wall', 'chiseled_deepslate', 'cobbled_deepslate', 'cobbled_deepslate_slab', 'cobbled_deepslate_stairs', 'cobbled_deepslate_wall', 'deepslate_bricks', 'deepslate_brick_slab', 'deepslate_brick_stairs', 'deepslate_brick_wall', 'cracked_deepslate_bricks', 'deepslate_tiles', 'deepslate_tile_slab', 'deepslate_tile_stairs', 'deepslate_tile_wall', 'cracked_deepslate_tiles']),
+}
+for group, (hardness, blocks) in MINING.items():
+    write(f'data/inc/tags/block/mining/g{group}.json', js({'values': ['minecraft:' + b for b in blocks]}))
+write('data/inc/tags/block/mining/pass_through.json', js({'values': ['minecraft:air', 'minecraft:cave_air', 'minecraft:void_air', 'minecraft:water', 'minecraft:lava']}))
+fn('mining/start', ['scoreboard players set @s inc.tmp 1',
+    'execute if score @s inc.mine matches 1.. store success score @s inc.tmp run attribute @s minecraft:block_break_speed modifier value get inc:stone_speed',
+    'execute if score @s inc.tmp matches 0 run scoreboard players set @s inc.mine 0',
+    'scoreboard players set @s inc.aim 0', 'scoreboard players set @s inc.trace 46',
+    'execute anchored eyes positioned ^ ^ ^ run function inc:mining/ray', 'execute unless score @s inc.mine = @s inc.aim run function inc:mining/apply'])
+fn('mining/ray', [f'execute if block ~ ~ ~ #inc:mining/g{g} run return run scoreboard players set @s inc.aim {g if h != 1.5 else 0}' for g, (h, _) in MINING.items()] +
+    ['execute unless block ~ ~ ~ #inc:mining/pass_through run return 0', 'scoreboard players remove @s inc.trace 1',
+     'execute if score @s inc.trace matches 1.. positioned ^ ^ ^0.1 run function inc:mining/ray'])
+fn('mining/apply', ['execute if score @s inc.mine matches 1.. run attribute @s minecraft:block_break_speed modifier remove inc:stone_speed',
+    'scoreboard players operation @s inc.mine = @s inc.aim'] +
+    [f'execute if score @s inc.aim matches {g} run attribute @s minecraft:block_break_speed modifier add inc:stone_speed {h/1.5-1:.10f} add_multiplied_total' for g, (h, _) in MINING.items() if h != 1.5])
+fn('mining/clear', ['execute if score @s inc.mine matches 1.. run attribute @s minecraft:block_break_speed modifier remove inc:stone_speed', 'scoreboard players set @s inc.mine 0'])
 
-# Fail before packaging if a function/tag references a missing resource.
-for path in PACK.rglob('*.json'):
-    json.loads(path.read_text(encoding='utf-8'))
-for path in PACK.rglob('*.mcfunction'):
-    for target in re.findall(r'\bfunction inc:([a-z0-9_/]+)', path.read_text(encoding='utf-8')):
-        assert (PACK / f'data/inc/function/{target}.mcfunction').exists(), (path, target)
-assert all(len(key) <= 16 for key in objectives)
-archive = ROOT / 'dist' / 'Incremental-26.3.zip'
-archive.parent.mkdir(exist_ok=True)
+legacy = []
+for i, (_, label, item, *_) in enumerate(CATALOG[:7]):
+    legacy.append(f'execute if score @s inc.bank{i} matches 1.. run function inc:legacy/claim/{i}')
+    fn(f'legacy/claim/{i}', [f'scoreboard players operation @s inc.amount = @s inc.bank{i}',
+        'scoreboard players set @s inc.tmp 64', 'scoreboard players operation @s inc.amount < @s inc.tmp',
+        'execute store result storage inc:runtime amount int 1 run scoreboard players get @s inc.amount', f'function inc:legacy/give/{i} with storage inc:runtime'])
+    fn(f'legacy/give/{i}', [f'$give @s minecraft:{item} $(amount)', f'scoreboard players operation @s inc.bank{i} -= @s inc.amount'])
+fn('legacy/claim', legacy)
+
+for p in PACK.rglob('*.json'):
+    json.loads(p.read_text(encoding='utf-8'))
+for p in PACK.rglob('*.mcfunction'):
+    for target in re.findall(r'\bfunction inc:([a-z0-9_/]+)', p.read_text(encoding='utf-8')):
+        assert (PACK / f'data/inc/function/{target}.mcfunction').exists(), (p, target)
+assert len(CATALOG) == 33 and len(BY_KEY) == len(CATALOG)
+assert all(row[4] in BY_KEY for row in CATALOG)
 if (ROOT / 'README.md').exists():
     write('README.md', (ROOT / 'README.md').read_text(encoding='utf-8'))
-with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as zipped:
-    for path in sorted(PACK.rglob('*')):
-        if path.is_file():
-            zipped.write(path, path.relative_to(PACK).as_posix())
-print(f'Built {archive}: {len(list(PACK.rglob("*.mcfunction")))} functions')
+archive = ROOT / 'dist' / 'Incremental-26.3.zip'
+archive.parent.mkdir(exist_ok=True)
+with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
+    for p in sorted(PACK.rglob('*')):
+        if p.is_file():
+            z.write(p, p.relative_to(PACK).as_posix())
+print(f'Built {len(CATALOG)} generators, {len(list(PACK.rglob("*.mcfunction")))} functions: {archive}')

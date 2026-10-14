@@ -1,12 +1,13 @@
-execute as @a[tag=!inc.ready] run function inc:init
-scoreboard players remove @a[scores={inc.cd=1..}] inc.cd 1
-execute as @a[scores={inc.used=1..}] if items entity @s weapon.mainhand minecraft:carrot_on_a_stick[minecraft:custom_data~{inc_tool:1b}] run function inc:click
-execute as @a[scores={inc.used=1..}] if items entity @s weapon.offhand minecraft:carrot_on_a_stick[minecraft:custom_data~{inc_tool:1b}] run function inc:click
-scoreboard players set @a inc.used 0
-execute as @a unless score @s inc.ui matches 0 run function inc:dispatch
-scoreboard players enable @a inc.ui
+execute as @a[tag=!inc.physical] run function inc:init
+execute as @a at @s unless score @s inc.shop matches 0 run function inc:shop/dispatch
+scoreboard players enable @a inc.shop
+execute as @a[tag=inc.physical,gamemode=!spectator] at @s run function inc:mining/start
+execute as @a[tag=inc.physical,gamemode=spectator] run function inc:mining/clear
+execute in minecraft:overworld as @e[type=minecraft:armor_stand,tag=inc.new.gen] at @s run function inc:gen/new
+execute in minecraft:the_nether as @e[type=minecraft:armor_stand,tag=inc.new.gen] at @s run function inc:gen/new
+execute in minecraft:the_end as @e[type=minecraft:armor_stand,tag=inc.new.gen] at @s run function inc:gen/new
+execute in minecraft:overworld as @e[type=minecraft:armor_stand,tag=inc.new.vault] at @s run function inc:vault/new
+execute in minecraft:the_nether as @e[type=minecraft:armor_stand,tag=inc.new.vault] at @s run function inc:vault/new
+execute in minecraft:the_end as @e[type=minecraft:armor_stand,tag=inc.new.vault] at @s run function inc:vault/new
 scoreboard players add #clock inc.sys 1
 execute if score #clock inc.sys matches 20.. run function inc:second
-execute in minecraft:overworld as @e[type=minecraft:interaction,tag=inc.storage] at @s if data entity @s interaction run function inc:warehouse/interact
-execute in minecraft:the_nether as @e[type=minecraft:interaction,tag=inc.storage] at @s if data entity @s interaction run function inc:warehouse/interact
-execute in minecraft:the_end as @e[type=minecraft:interaction,tag=inc.storage] at @s if data entity @s interaction run function inc:warehouse/interact

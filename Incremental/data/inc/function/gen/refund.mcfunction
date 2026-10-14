@@ -1,0 +1,35 @@
+execute if score @s inc.kind matches 0 run loot spawn ~ ~ ~ loot inc:tokens/gen/dirt
+execute if score @s inc.kind matches 1 run loot spawn ~ ~ ~ loot inc:tokens/gen/oak
+execute if score @s inc.kind matches 2 run loot spawn ~ ~ ~ loot inc:tokens/gen/stone
+execute if score @s inc.kind matches 3 run loot spawn ~ ~ ~ loot inc:tokens/gen/iron
+execute if score @s inc.kind matches 4 run loot spawn ~ ~ ~ loot inc:tokens/gen/gold
+execute if score @s inc.kind matches 5 run loot spawn ~ ~ ~ loot inc:tokens/gen/diamond
+execute if score @s inc.kind matches 6 run loot spawn ~ ~ ~ loot inc:tokens/gen/netherite
+execute if score @s inc.kind matches 7 run loot spawn ~ ~ ~ loot inc:tokens/gen/coal
+execute if score @s inc.kind matches 8 run loot spawn ~ ~ ~ loot inc:tokens/gen/copper
+execute if score @s inc.kind matches 9 run loot spawn ~ ~ ~ loot inc:tokens/gen/redstone
+execute if score @s inc.kind matches 10 run loot spawn ~ ~ ~ loot inc:tokens/gen/lapis
+execute if score @s inc.kind matches 11 run loot spawn ~ ~ ~ loot inc:tokens/gen/emerald
+execute if score @s inc.kind matches 12 run loot spawn ~ ~ ~ loot inc:tokens/gen/obsidian
+execute if score @s inc.kind matches 13 run loot spawn ~ ~ ~ loot inc:tokens/gen/quartz
+execute if score @s inc.kind matches 14 run loot spawn ~ ~ ~ loot inc:tokens/gen/glowstone
+execute if score @s inc.kind matches 15 run loot spawn ~ ~ ~ loot inc:tokens/gen/magma
+execute if score @s inc.kind matches 16 run loot spawn ~ ~ ~ loot inc:tokens/gen/sea_lantern
+execute if score @s inc.kind matches 17 run loot spawn ~ ~ ~ loot inc:tokens/gen/blue_ice
+execute if score @s inc.kind matches 18 run loot spawn ~ ~ ~ loot inc:tokens/gen/wool
+execute if score @s inc.kind matches 19 run loot spawn ~ ~ ~ loot inc:tokens/gen/string
+execute if score @s inc.kind matches 20 run loot spawn ~ ~ ~ loot inc:tokens/gen/slime
+execute if score @s inc.kind matches 21 run loot spawn ~ ~ ~ loot inc:tokens/gen/spruce
+execute if score @s inc.kind matches 22 run loot spawn ~ ~ ~ loot inc:tokens/gen/birch
+execute if score @s inc.kind matches 23 run loot spawn ~ ~ ~ loot inc:tokens/gen/jungle
+execute if score @s inc.kind matches 24 run loot spawn ~ ~ ~ loot inc:tokens/gen/acacia
+execute if score @s inc.kind matches 25 run loot spawn ~ ~ ~ loot inc:tokens/gen/dark_oak
+execute if score @s inc.kind matches 26 run loot spawn ~ ~ ~ loot inc:tokens/gen/mangrove
+execute if score @s inc.kind matches 27 run loot spawn ~ ~ ~ loot inc:tokens/gen/cherry
+execute if score @s inc.kind matches 28 run loot spawn ~ ~ ~ loot inc:tokens/gen/pale_oak
+execute if score @s inc.kind matches 29 run loot spawn ~ ~ ~ loot inc:tokens/gen/poplar
+execute if score @s inc.kind matches 30 run loot spawn ~ ~ ~ loot inc:tokens/gen/crimson
+execute if score @s inc.kind matches 31 run loot spawn ~ ~ ~ loot inc:tokens/gen/warped
+execute if score @s inc.kind matches 32 run loot spawn ~ ~ ~ loot inc:tokens/gen/bamboo
+function inc:entity/cleanup
+kill @s

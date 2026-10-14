@@ -1,102 +1,140 @@
-# Incremental — Minecraft Java 26.3
+# Incremental físico — Java 26.3 · v0.2.1
 
-Primera versión de un clicker con una cadena de materiales y almacenes personales.
-No requiere mods ni un resource pack.
+Generadores físicos que depositan objetos reales en el cofre de debajo. El menú se
+utiliza únicamente como tienda: no hay clicker, reservas personales ni barra permanente.
+No requiere mods ni resource pack. Datapack format **121.0**.
 
-## Instalación
+## Instalación y primeros pasos
 
-1. Copia `dist/Incremental-26.3.zip` en la carpeta `datapacks` de tu mundo.
-   También puedes copiar la carpeta `Incremental` completa, sin el ZIP.
-2. Entra con Minecraft **Java 26.3** y ejecuta `/reload` con permisos de operador.
-3. Abre el menú con `/trigger inc.ui set 1`.
+1. Copia `dist/Incremental-26.3.zip` a `datapacks` de tu mundo de **Minecraft Java 26.3**.
+   También puedes instalar la carpeta `Incremental`, pero no ambas copias.
+2. Ejecuta `/reload` con permisos de operador.
+3. Recibes una vez un generador de tierra, un cofre profundo y un cofre normal.
+4. Coloca el cofre profundo en el suelo con su objeto, agachado. Después coloca el
+   generador de tierra encima del cofre, agachado y haciendo clic en su cara superior.
+   Deja dos bloques de aire sobre el cofre para colocar el generador.
+5. Abre el cofre normalmente: va recibiendo tierra. Puedes retirarla con clic o
+   Mayús + clic, depositar pilas y utilizar tolvas.
+6. Abre **Tienda de generadores** desde las opciones personalizadas del menú de pausa,
+   desde las acciones rápidas, o con `/trigger inc.shop set 1`.
 
-Después de instalarlo, los jugadores pueden utilizar todas las opciones del menú
-sin permisos de operador. No instales la carpeta y el ZIP a la vez.
+La tienda es una ventana nativa de Minecraft con botones, cuatro categorías y precios.
+Las compras funcionan sin ser operador. Pagan primero con objetos de tu inventario y
+después con el cofre profundo más cercano de ese material, a un máximo de **8 bloques**.
+Así puedes pagar los precios superiores a la capacidad del inventario. Los cofres normales
+no se cobran automáticamente: retira sus materiales para pagar con ellos.
 
-## Cómo jugar
+## Generadores
 
-Empiezas con un generador de tierra que produce **1 tierra por segundo**.
-La herramienta «Generador incremental» permite generar más con clic derecho:
-produce el material seleccionado, con un máximo de cuatro clics por segundo.
-Puedes recuperarla desde el menú si la pierdes.
+Cada máquina produce **un objeto por segundo**. Compra más para aumentar la producción.
+Los precios son fijos; se paga con materiales reales, no con puntuaciones del jugador.
 
-| Generador | Coste inicial | Material real que se puede retirar |
+| Generador | Precio | Objeto producido |
 | --- | ---: | --- |
-| Tierra adicional | 16 de tierra | Tierra |
-| Madera | 256 de tierra | Tronco de roble |
-| Piedra | 512 de madera | Roca (`cobblestone`) |
-| Hierro | 1.024 de piedra | Lingote de hierro |
-| Oro | 2.048 de hierro | Lingote de oro |
-| Diamante | 4.096 de oro | Diamante |
-| Netherita | 8.192 de diamante | Lingote de netherita |
+| Tierra | 16 tierra | Tierra |
+| Roble | 256 tierra | Tronco de roble |
+| Piedra | 512 roble | Roca (`cobblestone`) |
+| Hierro | 1.024 piedra | Lingote de hierro |
+| Oro | 2.048 hierro | Lingote de oro |
+| Diamante | 4.096 oro | Diamante |
+| Netherita | 8.192 diamante | Lingote de netherita |
+| Carbón | 128 piedra | Carbón |
+| Cobre | 256 piedra | Lingote de cobre |
+| Redstone | 256 hierro | Polvo de redstone |
+| Lapislázuli | 256 hierro | Lapislázuli |
+| Esmeralda | 256 diamante | Esmeralda |
+| Obsidiana | 256 diamante | Obsidiana |
+| Cuarzo | 128 obsidiana | Cuarzo |
+| Piedra luminosa | 256 cuarzo | Bloque de piedra luminosa |
+| Bloque de magma | 128 obsidiana | Bloque de magma |
+| Linterna marina | 256 esmeralda | Linterna marina |
+| Hielo azul | 256 linternas marinas | Hielo azul |
+| Lana | 64 roble | Lana blanca, que se puede teñir |
+| Hilo | 64 lana | Hilo |
+| Bloque de slime | 256 hilo | Bloque de slime |
 
-Comprar un generador añade una unidad de producción por segundo y selecciona
-su material. Cada compra encarece el siguiente generador de ese material un 25 %,
-redondeando hacia abajo. Puedes tener hasta 50 de cada tipo.
+Los otros doce generadores de madera cuestan **256 troncos de roble** cada uno:
+abeto, abedul, jungla, acacia, roble oscuro, mangle, cerezo, roble pálido, álamo,
+carmesí, distorsionada y bambú. Generan el tronco, tallo o bloque de bambú de su
+tipo. Puedes transformarlos en las correspondientes tablas y otras variantes.
+En total hay **33 tipos de generadores**. El cobre está incluido una sola vez.
 
-Las mejoras se pagan con el propio material: empiezan en 32 unidades y duplican
-su precio cada vez. Cada mejora duplica la producción de todos los generadores de
-ese material y la cantidad por clic. Hay diez mejoras por material.
+El generador tiene una base de cristal con un bloque del material dentro. Es un bloque
+rompible y permite abrir el cofre inferior. Rompe el cristal para recuperar el generador;
+su objeto aparece en hasta un segundo. Si lo colocas fuera de un cofre, se devuelve.
+Si quitas el cofre inferior, el generador se pausa hasta que pongas otro.
 
-Todos los niveles desbloqueados producen a la vez. La producción funciona mientras
-el jugador está conectado y el mundo avanza; no genera durante una pausa ni calcula
-producción de tiempo desconectado. Los recursos y las mejoras se conservan al morir,
-salir y ejecutar `/reload`.
+Funcionan sobre cofres normales, cofres trampa y cofres profundos. Con un cofre doble
+llenan la mitad situada directamente debajo. Un cofre normal lleno detiene la producción:
+no sustituye sus objetos ni tira la producción al suelo. Las máquinas funcionan mientras
+sus chunks estén cargados y el mundo avance, incluso si su comprador no está conectado.
 
-## Almacenes de un solo material
+## Cofre profundo: un material y grandes cantidades
 
-Cada jugador tiene siete reservas, una por material. Los generadores envían ahí su
-producción. Las compras y mejoras gastan recursos de estas reservas.
+Es un cofre físico que se abre con la interfaz normal de cofres. Su reserva interna
+admite **1.000.000.000 unidades**, además de los objetos visibles que quepan en el cofre.
+No es literalmente infinito. El primer material depositado o generado fija su tipo.
+Acepta los 33 materiales del catálogo; los objetos de otro tipo o con componentes
+especiales se expulsan al suelo intactos. El filtrado y la reposición ocurren cada segundo.
 
-- **Depositar** convierte los objetos reales de tu inventario en unidades guardadas.
-  Solo acepta el objeto exacto de la tabla: otros tipos de troncos y piedra no sirven.
-- **Retirar 64** entrega hasta una pila de objetos reales y descuenta esa cantidad.
-  Si no tienes espacio, Minecraft deja los objetos en el suelo: recógelos.
-- **Colocar almacén** crea un barril visible del material seleccionado delante de ti.
-  Deja dos bloques de aire delante. Clic derecho abre el menú de sus reservas.
-- Cada barril representa un solo material. Otro jugador no puede acceder a tu reserva.
-- Puedes recoger tus almacenes a 32 bloques desde el menú. Retirarlos o volver a
-  colocarlos conserva todos los recursos. Puedes acceder a la reserva desde el menú
-  aunque el barril esté lejos.
+Mantiene una pila de hasta 64 en la primera casilla. Cuando la retiras, repone otra desde
+la reserva. Al depositar pilas normales del mismo material, las incorpora a la reserva.
+El texto sobre el cofre muestra su material y total antes de reponer la pila visible.
+Las tolvas también pueden introducir y extraer objetos normalmente.
 
-Estos barriles usan entidades `block_display` e `interaction`; su interfaz es el menú
-del chat y no las 27 casillas de un barril normal. No tienen colisión ni se rompen
-como un bloque normal. La reserva se guarda en el scoreboard, no en las casillas.
-Cada material admite **1.000.000.000 unidades por jugador**. Al alcanzar el límite,
-la producción adicional se descarta; los depósitos solo consumen los objetos que caben.
+Al romperlo, los objetos visibles caen como en un cofre normal y recibes un objeto
+«Cofre profundo recuperado» que conserva la reserva interna. Recógelo y vuelve a
+colocarlo para recuperarla. **Guarda ese objeto**: si se quema o desaparece, pierdes
+la posibilidad de recuperar su reserva en supervivencia. Los cofres no son privados;
+cualquier jugador cercano puede abrirlos y pagar desde ellos.
 
-El depósito toma todos los objetos del tipo indicado, incluidos los renombrados o
-con componentes especiales. Al retirarlos se entregan objetos normales. No deposites
-un objeto especial que quieras conservar con sus componentes.
+Mantén cada cofre profundo separado, sin unirlo a otro cofre doble, para que su interfaz
+represente una única reserva. También conserva un tipo mientras esté vacío; para otro
+material compra un cofre profundo nuevo por 64 lingotes de hierro.
 
-## Controles
+## Picado de piedra negra, basalto y pizarra profunda
 
-| Comando | Acción |
-| --- | --- |
-| `/trigger inc.ui set 1` | Menú completo |
-| `/trigger inc.ui set 2` | Generar material seleccionado |
-| `/trigger inc.ui set 3` | Recuperar herramienta |
-| `/trigger inc.ui set 4` | Mostrar u ocultar la barra de estado |
-| `/trigger inc.ui set 60` | Colocar almacén del material seleccionado |
-| `/trigger inc.ui set 61` | Recoger tus almacenes cercanos |
+Se iguala el progreso de picado con el de **piedra normal**, usando la misma herramienta,
+Eficiencia, Prisa y condiciones ambientales. Incluye los tres basaltos y las variantes
+de construcción de piedra negra y pizarra profunda. No cambia las menas de pizarra profunda.
 
-El menú ofrece botones para seleccionar, comprar, mejorar, depositar y retirar cada
-material. Los números son unidades de recursos, no puntos abstractos. La barra de estado
-puede competir con la de otros datapacks; puedes ocultarla.
+La piedra negra natural ya tiene la misma dureza que la piedra. Basalto es algo menos
+duro, por lo que igualarlo a piedra implica ralentizarlo ligeramente. Pizarra profunda
+y las variantes más duras reciben el multiplicador correspondiente a su dureza real.
 
-## Desarrollo y comprobación
+Se aplica un modificador temporal mientras miras estos bloques, dentro del alcance
+normal de supervivencia, y se retira al mirar otros. No se modifican los picos ni sus
+encantamientos. Al mirar a través de bloques de forma parcial, el muestreo puede detenerse
+en ese bloque: está pensado principalmente para bloques completos al excavar chunks.
+Antes de desactivar el datapack, retira su modificador con
+`/execute as @a run function inc:mining/clear`.
 
-`python tools/build.py` genera las funciones y el ZIP. La configuración de materiales,
-costes y textos está en `tools/build.py`; edita ese archivo y vuelve a generar el pack.
+## Actualización desde v0.1
 
-El formato 121.0 se comprobó tanto en las
-[notas oficiales de Java 26.3](https://www.minecraft.net/en-us/article/minecraft-java-edition-26-3)
-como en `version.json` del JAR instalado.
+Sustituye el ZIP anterior y ejecuta `/reload`. Se eliminan los barriles visuales antiguos
+cuando sus chunks estén cargados y recibes el nuevo equipo inicial una sola vez.
+Los antiguos contadores se conservan para recuperarlos manualmente: un operador puede
+ejecutar `/execute as NOMBRE run function inc:legacy/claim` para entregar hasta 64 de cada
+reserva antigua. Repite hasta vaciarlas; no se generan miles de objetos automáticamente.
 
-`tools/Validate.java` permite compilar las funciones con el parser de comandos de esa
-instalación, incluidas las macros de depósito y retirada. No arranca un servidor ni
-modifica mundos. Resultado de esta versión: **75 funciones válidas, sin errores**,
-incluidas las macros instanciadas con cantidades reales.
-La comprobación del parser no sustituye una prueba jugable: conviene
-probar la interacción con los barriles, las retiradas con inventario lleno y el acceso
-con dos jugadores dentro de Minecraft.
+## Desarrollo y validación
+
+`python tools/build.py` reconstruye las funciones, recursos y el ZIP. Edita ese archivo,
+no las funciones generadas. `tools/Validate.java` usa el JAR y las bibliotecas de tu
+instalación de 26.3 para compilar funciones y macros, decodificar las tablas de botín y
+los diálogos, comprobar las durezas reales y probar la inserción en contenedores.
+
+Las pruebas del motor incluyen cofres vacíos, pilas parciales, cofres llenos y objetos
+renombrados, además del formato NBT de los objetos y la normalización del picado.
+Resultado: **418 funciones y 72 tablas de botín/diálogos válidos, sin errores**.
+No sustituyen una prueba de juego de colocación, tolvas, recuperación
+del cofre profundo y multijugador. No se han abierto ni modificado tus mundos.
+
+La versión 0.2.1 corrige la colocación sobre la tapa del cofre y mueve el texto al
+frente para que no bloquee la colocación del generador. Sustituye el ZIP y ejecuta
+`/reload`: los cofres profundos existentes se corrigen al cargar sus chunks y los
+generadores que ya tengas en el inventario siguen sirviendo.
+
+Los diálogos nativos y el formato del pack se documentan en las notas oficiales de
+[Java 1.21.6](https://www.minecraft.net/en-us/article/minecraft-java-edition-1-21-6) y
+[Java 26.3](https://www.minecraft.net/en-us/article/minecraft-java-edition-26-3).

@@ -1,59 +1,8 @@
-scoreboard players add #next inc.sys 1
-scoreboard players operation @s inc.id = #next inc.sys
-scoreboard players set @s inc.sel 0
-scoreboard players set @s inc.cd 0
-scoreboard players set @s inc.hud 1
-scoreboard players set @s inc.used 0
-scoreboard players set @s inc.ui 0
-scoreboard players set @s inc.bank0 0
-scoreboard players set @s inc.qty0 1
-scoreboard players set @s inc.price0 16
-scoreboard players set @s inc.pow0 1
-scoreboard players set @s inc.level0 0
-scoreboard players set @s inc.up0 32
-scoreboard players set @s inc.rate0 1
-scoreboard players set @s inc.bank1 0
-scoreboard players set @s inc.qty1 0
-scoreboard players set @s inc.price1 256
-scoreboard players set @s inc.pow1 1
-scoreboard players set @s inc.level1 0
-scoreboard players set @s inc.up1 32
-scoreboard players set @s inc.rate1 0
-scoreboard players set @s inc.bank2 0
-scoreboard players set @s inc.qty2 0
-scoreboard players set @s inc.price2 512
-scoreboard players set @s inc.pow2 1
-scoreboard players set @s inc.level2 0
-scoreboard players set @s inc.up2 32
-scoreboard players set @s inc.rate2 0
-scoreboard players set @s inc.bank3 0
-scoreboard players set @s inc.qty3 0
-scoreboard players set @s inc.price3 1024
-scoreboard players set @s inc.pow3 1
-scoreboard players set @s inc.level3 0
-scoreboard players set @s inc.up3 32
-scoreboard players set @s inc.rate3 0
-scoreboard players set @s inc.bank4 0
-scoreboard players set @s inc.qty4 0
-scoreboard players set @s inc.price4 2048
-scoreboard players set @s inc.pow4 1
-scoreboard players set @s inc.level4 0
-scoreboard players set @s inc.up4 32
-scoreboard players set @s inc.rate4 0
-scoreboard players set @s inc.bank5 0
-scoreboard players set @s inc.qty5 0
-scoreboard players set @s inc.price5 4096
-scoreboard players set @s inc.pow5 1
-scoreboard players set @s inc.level5 0
-scoreboard players set @s inc.up5 32
-scoreboard players set @s inc.rate5 0
-scoreboard players set @s inc.bank6 0
-scoreboard players set @s inc.qty6 0
-scoreboard players set @s inc.price6 8192
-scoreboard players set @s inc.pow6 1
-scoreboard players set @s inc.level6 0
-scoreboard players set @s inc.up6 32
-scoreboard players set @s inc.rate6 0
-tag @s add inc.ready
-function inc:tool
-function inc:menu
+clear @s minecraft:carrot_on_a_stick[minecraft:custom_data~{inc_tool:1b}]
+scoreboard players set @s inc.shop 0
+scoreboard players set @s inc.mine 0
+tag @s add inc.physical
+loot give @s loot inc:tokens/gen/dirt
+loot give @s loot inc:tokens/vault
+give @s minecraft:chest 1
+tellraw @s {"text":"Coloca el cofre profundo en el suelo y el generador de tierra sobre él, agachado. Tienda: /trigger inc.shop set 1","color":"green"}
