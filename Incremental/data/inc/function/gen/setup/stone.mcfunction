@@ -1,1 +1,2 @@
-execute positioned ~-0.5 ~ ~-0.5 summon minecraft:block_display run function inc:gen/display/stone
+execute positioned ~ ~0.5 ~ summon minecraft:item_display run function inc:gen/display/stone
+tag @s add inc.visual2

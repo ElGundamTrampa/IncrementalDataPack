@@ -1,2 +1,3 @@
 function inc:entity/display_id
-data merge entity @s {block_state:{Name:"minecraft:gold_block"},transformation:{translation:[0.05f,0.05f,0.05f],scale:[0.9f,0.9f,0.9f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f]}}
+tag @s add inc.icon
+data merge entity @s {item:{id:"minecraft:gold_ingot",count:1},item_display:"ground",teleport_duration:1,transformation:{translation:[0f,0f,0f],scale:[0.65f,0.65f,0.65f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f]}}

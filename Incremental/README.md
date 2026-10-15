@@ -1,4 +1,4 @@
-# Incremental físico — Java 26.3 · v0.2.1
+# Incremental  — Java 26.3 · v1.1.0
 
 Generadores físicos que depositan objetos reales en el cofre de debajo. El menú se
 utiliza únicamente como tienda: no hay clicker, reservas personales ni barra permanente.
@@ -18,7 +18,8 @@ No requiere mods ni resource pack. Datapack format **121.0**.
 6. Abre **Tienda de generadores** desde las opciones personalizadas del menú de pausa,
    desde las acciones rápidas, o con `/trigger inc.shop set 1`.
 
-La tienda es una ventana nativa de Minecraft con botones, cuatro categorías y precios.
+La tienda es una ventana nativa de Minecraft con iconos reales, cuatro categorías y precios.
+Pulsa «Comprar» junto al icono del objeto que quieres generar.
 Las compras funcionan sin ser operador. Pagan primero con objetos de tu inventario y
 después con el cofre profundo más cercano de ese material, a un máximo de **8 bloques**.
 Así puedes pagar los precios superiores a la capacidad del inventario. Los cofres normales
@@ -59,7 +60,7 @@ carmesí, distorsionada y bambú. Generan el tronco, tallo o bloque de bambú de
 tipo. Puedes transformarlos en las correspondientes tablas y otras variantes.
 En total hay **33 tipos de generadores**. El cobre está incluido una sola vez.
 
-El generador tiene una base de cristal con un bloque del material dentro. Es un bloque
+El generador tiene una base de cristal con un icono giratorio del objeto dentro. Es un bloque
 rompible y permite abrir el cofre inferior. Rompe el cristal para recuperar el generador;
 su objeto aparece en hasta un segundo. Si lo colocas fuera de un cofre, se devuelve.
 Si quitas el cofre inferior, el generador se pausa hasta que pongas otro.
@@ -73,13 +74,16 @@ sus chunks estén cargados y el mundo avance, incluso si su comprador no está c
 
 Es un cofre físico que se abre con la interfaz normal de cofres. Su reserva interna
 admite **1.000.000.000 unidades**, además de los objetos visibles que quepan en el cofre.
-No es literalmente infinito. El primer material depositado o generado fija su tipo.
-Acepta los 33 materiales del catálogo; los objetos de otro tipo o con componentes
-especiales se expulsan al suelo intactos. El filtrado y la reposición ocurren cada segundo.
+No es literalmente infinito. Acepta **cualquier objeto**, incluidos herramientas, libros,
+objetos renombrados, encantados y cajas de shulker con contenido. Guarda todos sus
+componentes. El primer objeto fija el tipo: solo se mezclan ejemplares con exactamente
+los mismos componentes; otro tipo se expulsa al suelo intacto. El filtrado y la reposición
+ocurren cada segundo.
 
-Mantiene una pila de hasta 64 en la primera casilla. Cuando la retiras, repone otra desde
-la reserva. Al depositar pilas normales del mismo material, las incorpora a la reserva.
-El texto sobre el cofre muestra su material y total antes de reponer la pila visible.
+Mantiene una pila en la primera casilla, respetando el máximo de ese objeto (por ejemplo,
+64 bloques, 16 perlas de ender o una herramienta). Cuando la retiras, repone otra desde
+la reserva. El texto junto al cofre muestra **solo la cantidad**, antes de reponer la pila.
+El cofre se orienta según la dirección en la que lo colocas, como un cofre normal.
 Las tolvas también pueden introducir y extraer objetos normalmente.
 
 Al romperlo, los objetos visibles caen como en un cofre normal y recibes un objeto
@@ -89,8 +93,9 @@ la posibilidad de recuperar su reserva en supervivencia. Los cofres no son priva
 cualquier jugador cercano puede abrirlos y pagar desde ellos.
 
 Mantén cada cofre profundo separado, sin unirlo a otro cofre doble, para que su interfaz
-represente una única reserva. También conserva un tipo mientras esté vacío; para otro
-material compra un cofre profundo nuevo por 64 lingotes de hierro.
+represente una única reserva. Cuando ya no hay unidades ni en la reserva ni en las
+casillas, se libera el tipo y puedes guardar otro objeto. Si hay un generador encima,
+quítalo mientras cambias de tipo para que no vuelva a rellenarlo automáticamente.
 
 ## Picado de piedra negra, basalto y pizarra profunda
 
@@ -126,7 +131,9 @@ los diálogos, comprobar las durezas reales y probar la inserción en contenedor
 
 Las pruebas del motor incluyen cofres vacíos, pilas parciales, cofres llenos y objetos
 renombrados, además del formato NBT de los objetos y la normalización del picado.
-Resultado: **418 funciones y 72 tablas de botín/diálogos válidos, sin errores**.
+Resultado: **327 funciones y 72 tablas de botín/diálogos válidos, sin errores**.
+También se comprueba que la reserva conserva componentes de herramientas encantadas
+y dañadas y el contenido de cajas de shulker, respetando pilas de 64, 16 y 1.
 No sustituyen una prueba de juego de colocación, tolvas, recuperación
 del cofre profundo y multijugador. No se han abierto ni modificado tus mundos.
 
@@ -134,6 +141,11 @@ La versión 0.2.1 corrige la colocación sobre la tapa del cofre y mueve el text
 frente para que no bloquee la colocación del generador. Sustituye el ZIP y ejecuta
 `/reload`: los cofres profundos existentes se corrigen al cargar sus chunks y los
 generadores que ya tengas en el inventario siguen sirviendo.
+
+La versión 1.1.0 actualiza automáticamente los iconos de los generadores al cargar sus
+chunks y conserva las reservas de los cofres existentes. Los cofres ya colocados conservan
+su orientación; los nuevos y los recuperados se orientan al colocarlos. La lista de tamaños
+de pila en `tools/stack_sizes.json` procede del registro de objetos del motor 26.3.
 
 Los diálogos nativos y el formato del pack se documentan en las notas oficiales de
 [Java 1.21.6](https://www.minecraft.net/en-us/article/minecraft-java-edition-1-21-6) y

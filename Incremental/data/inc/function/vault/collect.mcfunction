@@ -1,3 +1,5 @@
+function inc:vault/read
+execute if score @s inc.buf matches 0 if data storage inc:runtime prototype run function inc:vault/reconsider
 execute if items block ~ ~ ~ container.0 * run function inc:vault/slot/0
 execute if items block ~ ~ ~ container.1 * run function inc:vault/slot/1
 execute if items block ~ ~ ~ container.2 * run function inc:vault/slot/2

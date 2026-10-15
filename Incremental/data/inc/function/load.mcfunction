@@ -1,4 +1,5 @@
 execute unless data storage inc:meta {physical:2} run function inc:setup
+execute unless data storage inc:meta {universal:1b} run function inc:vault/bootstrap
 scoreboard players set #clock inc.sys 0
 scoreboard players set #cap inc.sys 1000000000
 execute in minecraft:overworld run kill @e[tag=inc.storage_part]

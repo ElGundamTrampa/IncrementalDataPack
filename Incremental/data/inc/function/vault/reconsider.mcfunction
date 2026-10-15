@@ -1,0 +1,29 @@
+scoreboard players set #old inc.tmp 0
+execute if items block ~ ~ ~ container.0 * run function inc:vault/peek/0
+execute if items block ~ ~ ~ container.1 * run function inc:vault/peek/1
+execute if items block ~ ~ ~ container.2 * run function inc:vault/peek/2
+execute if items block ~ ~ ~ container.3 * run function inc:vault/peek/3
+execute if items block ~ ~ ~ container.4 * run function inc:vault/peek/4
+execute if items block ~ ~ ~ container.5 * run function inc:vault/peek/5
+execute if items block ~ ~ ~ container.6 * run function inc:vault/peek/6
+execute if items block ~ ~ ~ container.7 * run function inc:vault/peek/7
+execute if items block ~ ~ ~ container.8 * run function inc:vault/peek/8
+execute if items block ~ ~ ~ container.9 * run function inc:vault/peek/9
+execute if items block ~ ~ ~ container.10 * run function inc:vault/peek/10
+execute if items block ~ ~ ~ container.11 * run function inc:vault/peek/11
+execute if items block ~ ~ ~ container.12 * run function inc:vault/peek/12
+execute if items block ~ ~ ~ container.13 * run function inc:vault/peek/13
+execute if items block ~ ~ ~ container.14 * run function inc:vault/peek/14
+execute if items block ~ ~ ~ container.15 * run function inc:vault/peek/15
+execute if items block ~ ~ ~ container.16 * run function inc:vault/peek/16
+execute if items block ~ ~ ~ container.17 * run function inc:vault/peek/17
+execute if items block ~ ~ ~ container.18 * run function inc:vault/peek/18
+execute if items block ~ ~ ~ container.19 * run function inc:vault/peek/19
+execute if items block ~ ~ ~ container.20 * run function inc:vault/peek/20
+execute if items block ~ ~ ~ container.21 * run function inc:vault/peek/21
+execute if items block ~ ~ ~ container.22 * run function inc:vault/peek/22
+execute if items block ~ ~ ~ container.23 * run function inc:vault/peek/23
+execute if items block ~ ~ ~ container.24 * run function inc:vault/peek/24
+execute if items block ~ ~ ~ container.25 * run function inc:vault/peek/25
+execute if items block ~ ~ ~ container.26 * run function inc:vault/peek/26
+execute if score #old inc.tmp matches 0 run function inc:vault/reset

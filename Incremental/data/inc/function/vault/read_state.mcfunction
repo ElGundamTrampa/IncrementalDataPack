@@ -1,0 +1,35 @@
+$execute if data storage inc:vaults v$(id).prototype run data modify storage inc:runtime prototype set from storage inc:vaults v$(id).prototype
+$execute if data storage inc:vaults v$(id).max run execute store result score @s inc.stack run data get storage inc:vaults v$(id).max
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 0 run data modify storage inc:runtime prototype set value {id:"minecraft:dirt"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 1 run data modify storage inc:runtime prototype set value {id:"minecraft:oak_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 2 run data modify storage inc:runtime prototype set value {id:"minecraft:cobblestone"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 3 run data modify storage inc:runtime prototype set value {id:"minecraft:iron_ingot"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 4 run data modify storage inc:runtime prototype set value {id:"minecraft:gold_ingot"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 5 run data modify storage inc:runtime prototype set value {id:"minecraft:diamond"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 6 run data modify storage inc:runtime prototype set value {id:"minecraft:netherite_ingot"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 7 run data modify storage inc:runtime prototype set value {id:"minecraft:coal"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 8 run data modify storage inc:runtime prototype set value {id:"minecraft:copper_ingot"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 9 run data modify storage inc:runtime prototype set value {id:"minecraft:redstone"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 10 run data modify storage inc:runtime prototype set value {id:"minecraft:lapis_lazuli"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 11 run data modify storage inc:runtime prototype set value {id:"minecraft:emerald"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 12 run data modify storage inc:runtime prototype set value {id:"minecraft:obsidian"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 13 run data modify storage inc:runtime prototype set value {id:"minecraft:quartz"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 14 run data modify storage inc:runtime prototype set value {id:"minecraft:glowstone"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 15 run data modify storage inc:runtime prototype set value {id:"minecraft:magma_block"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 16 run data modify storage inc:runtime prototype set value {id:"minecraft:sea_lantern"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 17 run data modify storage inc:runtime prototype set value {id:"minecraft:blue_ice"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 18 run data modify storage inc:runtime prototype set value {id:"minecraft:white_wool"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 19 run data modify storage inc:runtime prototype set value {id:"minecraft:string"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 20 run data modify storage inc:runtime prototype set value {id:"minecraft:slime_block"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 21 run data modify storage inc:runtime prototype set value {id:"minecraft:spruce_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 22 run data modify storage inc:runtime prototype set value {id:"minecraft:birch_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 23 run data modify storage inc:runtime prototype set value {id:"minecraft:jungle_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 24 run data modify storage inc:runtime prototype set value {id:"minecraft:acacia_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 25 run data modify storage inc:runtime prototype set value {id:"minecraft:dark_oak_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 26 run data modify storage inc:runtime prototype set value {id:"minecraft:mangrove_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 27 run data modify storage inc:runtime prototype set value {id:"minecraft:cherry_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 28 run data modify storage inc:runtime prototype set value {id:"minecraft:pale_oak_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 29 run data modify storage inc:runtime prototype set value {id:"minecraft:poplar_log"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 30 run data modify storage inc:runtime prototype set value {id:"minecraft:crimson_stem"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 31 run data modify storage inc:runtime prototype set value {id:"minecraft:warped_stem"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 32 run data modify storage inc:runtime prototype set value {id:"minecraft:bamboo_block"}

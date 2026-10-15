@@ -1,1 +1,2 @@
-execute positioned ~-0.5 ~ ~-0.5 summon minecraft:block_display run function inc:gen/display/wool
+execute positioned ~ ~0.5 ~ summon minecraft:item_display run function inc:gen/display/wool
+tag @s add inc.visual2

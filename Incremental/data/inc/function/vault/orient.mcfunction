@@ -1,0 +1,6 @@
+execute store result score @s inc.tmp run data get entity @s Rotation[0]
+execute if score @s inc.tmp matches -45..44 run setblock ~ ~ ~ minecraft:chest[facing=south,type=single,waterlogged=false]
+execute if score @s inc.tmp matches 45..134 run setblock ~ ~ ~ minecraft:chest[facing=west,type=single,waterlogged=false]
+execute if score @s inc.tmp matches -134..-46 run setblock ~ ~ ~ minecraft:chest[facing=east,type=single,waterlogged=false]
+execute if score @s inc.tmp matches 135.. run setblock ~ ~ ~ minecraft:chest[facing=north,type=single,waterlogged=false]
+execute if score @s inc.tmp matches ..-135 run setblock ~ ~ ~ minecraft:chest[facing=north,type=single,waterlogged=false]

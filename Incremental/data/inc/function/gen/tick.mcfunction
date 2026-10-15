@@ -1,3 +1,4 @@
+execute unless entity @s[tag=inc.visual2] run function inc:gen/upgrade_visual
 execute unless block ~ ~ ~ minecraft:glass run return run function inc:gen/refund
 execute unless block ~ ~-1 ~ #inc:chests run return 0
 scoreboard players operation #kind inc.tmp = @s inc.kind

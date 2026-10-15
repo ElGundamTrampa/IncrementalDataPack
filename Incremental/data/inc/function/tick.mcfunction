@@ -9,5 +9,8 @@ execute in minecraft:the_end as @e[type=minecraft:armor_stand,tag=inc.new.gen] a
 execute in minecraft:overworld as @e[type=minecraft:armor_stand,tag=inc.new.vault] at @s run function inc:vault/new
 execute in minecraft:the_nether as @e[type=minecraft:armor_stand,tag=inc.new.vault] at @s run function inc:vault/new
 execute in minecraft:the_end as @e[type=minecraft:armor_stand,tag=inc.new.vault] at @s run function inc:vault/new
+execute in minecraft:overworld as @e[type=minecraft:item_display,tag=inc.icon] at @s run tp @s ~ ~ ~ ~6 ~
+execute in minecraft:the_nether as @e[type=minecraft:item_display,tag=inc.icon] at @s run tp @s ~ ~ ~ ~6 ~
+execute in minecraft:the_end as @e[type=minecraft:item_display,tag=inc.icon] at @s run tp @s ~ ~ ~ ~6 ~
 scoreboard players add #clock inc.sys 1
 execute if score #clock inc.sys matches 20.. run function inc:second

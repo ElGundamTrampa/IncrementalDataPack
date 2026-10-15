@@ -45,6 +45,9 @@ public class Validate {
         Path base = Path.of(args[0]);
         var registries = VanillaRegistries.createWorldLookup();
         for (var pending : BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(registries)) pending.apply();
+        var sizes = new com.google.gson.JsonObject();
+        for (var item : BuiltInRegistries.ITEM) sizes.addProperty(BuiltInRegistries.ITEM.getKey(item).toString(), item.getDefaultMaxStackSize());
+        Files.writeString(Path.of(".test-server/stack_sizes.json"), sizes.toString());
         var dialogRegistry = new MappedRegistry<Dialog>(Registries.DIALOG, Lifecycle.stable());
         var dialogOps = RegistryOps.create(JsonOps.INSTANCE, registries);
         Path dialogs = base.getParent().resolve("dialog");
@@ -74,6 +77,7 @@ public class Validate {
                     params.putInt("slot", 0);
                     params.putInt("left", 32);
                     params.putInt("total", 256);
+                    params.putInt("maximum", 64);
                     params.put("stack", TagParser.parseCompoundFully("{id:\"minecraft:dirt\",count:64}"));
                     fn.instantiate(params, commands.getDispatcher());
                     count++;
@@ -175,6 +179,23 @@ public class Validate {
         if (lid != 0.875 || !BlockPos.containing(0.5, lid, 0.5).above().equals(new BlockPos(0, 1, 0)))
             throw new AssertionError("Chest-lid placement assumption changed");
         System.out.println("PLACEMENT: chest-lid height and non-obstructing label regressions passed");
+        var nbtOps = RegistryOps.create(NbtOps.INSTANCE, registries);
+        var pickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
+        pickaxe.set(DataComponents.CUSTOM_NAME, Component.literal("Mi pico"));
+        pickaxe.set(DataComponents.DAMAGE, 731);
+        pickaxe.enchant(registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(ResourceKey.create(Registries.ENCHANTMENT, Identifier.parse("minecraft:efficiency"))), 5);
+        var shulker = new ItemStack(Items.SHULKER_BOX);
+        shulker.set(DataComponents.CONTAINER, net.minecraft.world.item.component.ItemContainerContents.fromItems(List.of(pickaxe.copy(), new ItemStack(Items.DIAMOND, 42))));
+        for (var original : List.of(new ItemStack(Items.DIRT, 64), new ItemStack(Items.ENDER_PEARL, 16), pickaxe, shulker)) {
+            var prototype = (CompoundTag)ItemStack.CODEC.encodeStart(nbtOps, original).getOrThrow();
+            prototype.remove("count");
+            var withdrawn = prototype.copy();
+            withdrawn.putInt("count", original.getMaxStackSize());
+            var restored = ItemStack.CODEC.parse(nbtOps, withdrawn).getOrThrow();
+            if (!ItemStack.isSameItemSameComponents(original, restored) || restored.getCount() != original.getMaxStackSize())
+                throw new AssertionError("Universal vault altered item components: " + original);
+        }
+        System.out.println("UNIVERSAL VAULT: 64/16/1 stacks, names, damage, Efficiency and nested shulker contents roundtrip passed");
         System.out.println("BEHAVIOR: empty/partial/full/special-item chest insertion, chest clearance, mining normalization passed");
         System.out.println("RESOURCES: " + resources + " loot tables/dialogs validated");
         System.out.println("RESULT: " + count + " functions passed; " + errors + " errors");
