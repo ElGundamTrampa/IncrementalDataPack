@@ -33,3 +33,7 @@ execute if score @s inc.kind matches 29 run function inc:gen/setup/poplar
 execute if score @s inc.kind matches 30 run function inc:gen/setup/crimson
 execute if score @s inc.kind matches 31 run function inc:gen/setup/warped
 execute if score @s inc.kind matches 32 run function inc:gen/setup/bamboo
+execute if score @s inc.kind matches 33 run function inc:gen/setup/sand
+execute if score @s inc.kind matches 34 run function inc:gen/setup/soul_sand
+execute if score @s inc.kind matches 35 run function inc:gen/setup/blaze_rod
+execute if score @s inc.kind matches 36 run function inc:gen/setup/wither_skull

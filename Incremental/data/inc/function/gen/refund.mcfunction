@@ -31,5 +31,9 @@ execute if score @s inc.kind matches 29 run loot spawn ~ ~ ~ loot inc:tokens/gen
 execute if score @s inc.kind matches 30 run loot spawn ~ ~ ~ loot inc:tokens/gen/crimson
 execute if score @s inc.kind matches 31 run loot spawn ~ ~ ~ loot inc:tokens/gen/warped
 execute if score @s inc.kind matches 32 run loot spawn ~ ~ ~ loot inc:tokens/gen/bamboo
+execute if score @s inc.kind matches 33 run loot spawn ~ ~ ~ loot inc:tokens/gen/sand
+execute if score @s inc.kind matches 34 run loot spawn ~ ~ ~ loot inc:tokens/gen/soul_sand
+execute if score @s inc.kind matches 35 run loot spawn ~ ~ ~ loot inc:tokens/gen/blaze_rod
+execute if score @s inc.kind matches 36 run loot spawn ~ ~ ~ loot inc:tokens/gen/wither_skull
 function inc:entity/cleanup
 kill @s

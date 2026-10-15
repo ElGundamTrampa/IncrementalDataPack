@@ -32,6 +32,10 @@ execute if entity @s[tag=inc.type.poplar] run scoreboard players set @s inc.kind
 execute if entity @s[tag=inc.type.crimson] run scoreboard players set @s inc.kind 30
 execute if entity @s[tag=inc.type.warped] run scoreboard players set @s inc.kind 31
 execute if entity @s[tag=inc.type.bamboo] run scoreboard players set @s inc.kind 32
+execute if entity @s[tag=inc.type.sand] run scoreboard players set @s inc.kind 33
+execute if entity @s[tag=inc.type.soul_sand] run scoreboard players set @s inc.kind 34
+execute if entity @s[tag=inc.type.blaze_rod] run scoreboard players set @s inc.kind 35
+execute if entity @s[tag=inc.type.wither_skull] run scoreboard players set @s inc.kind 36
 execute if block ~ ~ ~ #inc:chests align xyz positioned ~0.5 ~1 ~0.5 run return run function inc:gen/place
 execute if block ~ ~-1 ~ #inc:chests align xyz positioned ~0.5 ~ ~0.5 run return run function inc:gen/place
 function inc:gen/refund

@@ -35,5 +35,9 @@ execute if score @s inc.shop matches 129 run function inc:shop/buy/poplar
 execute if score @s inc.shop matches 130 run function inc:shop/buy/crimson
 execute if score @s inc.shop matches 131 run function inc:shop/buy/warped
 execute if score @s inc.shop matches 132 run function inc:shop/buy/bamboo
+execute if score @s inc.shop matches 133 run function inc:shop/buy/sand
+execute if score @s inc.shop matches 134 run function inc:shop/buy/soul_sand
+execute if score @s inc.shop matches 135 run function inc:shop/buy/blaze_rod
+execute if score @s inc.shop matches 136 run function inc:shop/buy/wither_skull
 execute if score @s inc.shop matches 10 run function inc:shop/vault
 scoreboard players set @s inc.shop 0

@@ -36,3 +36,7 @@ execute if score @s inc.kind matches 29 run loot insert ~ ~-1 ~ loot inc:output/
 execute if score @s inc.kind matches 30 run loot insert ~ ~-1 ~ loot inc:output/crimson
 execute if score @s inc.kind matches 31 run loot insert ~ ~-1 ~ loot inc:output/warped
 execute if score @s inc.kind matches 32 run loot insert ~ ~-1 ~ loot inc:output/bamboo
+execute if score @s inc.kind matches 33 run loot insert ~ ~-1 ~ loot inc:output/sand
+execute if score @s inc.kind matches 34 run loot insert ~ ~-1 ~ loot inc:output/soul_sand
+execute if score @s inc.kind matches 35 run loot insert ~ ~-1 ~ loot inc:output/blaze_rod
+execute if score @s inc.kind matches 36 run loot insert ~ ~-1 ~ loot inc:output/wither_skull

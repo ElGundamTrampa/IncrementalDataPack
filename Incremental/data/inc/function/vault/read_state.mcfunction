@@ -33,3 +33,7 @@ execute unless data storage inc:runtime prototype if score @s inc.kind matches 2
 execute unless data storage inc:runtime prototype if score @s inc.kind matches 30 run data modify storage inc:runtime prototype set value {id:"minecraft:crimson_stem"}
 execute unless data storage inc:runtime prototype if score @s inc.kind matches 31 run data modify storage inc:runtime prototype set value {id:"minecraft:warped_stem"}
 execute unless data storage inc:runtime prototype if score @s inc.kind matches 32 run data modify storage inc:runtime prototype set value {id:"minecraft:bamboo_block"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 33 run data modify storage inc:runtime prototype set value {id:"minecraft:sand"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 34 run data modify storage inc:runtime prototype set value {id:"minecraft:soul_sand"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 35 run data modify storage inc:runtime prototype set value {id:"minecraft:blaze_rod"}
+execute unless data storage inc:runtime prototype if score @s inc.kind matches 36 run data modify storage inc:runtime prototype set value {id:"minecraft:wither_skeleton_skull"}

@@ -38,6 +38,14 @@ WOODS = [('spruce', 'Abeto', 'spruce_log'), ('birch', 'Abedul', 'birch_log'),
          ('poplar', 'Álamo', 'poplar_log'), ('crimson', 'Carmesí', 'crimson_stem'),
          ('warped', 'Distorsionada', 'warped_stem'), ('bamboo', 'Bambú', 'bamboo_block')]
 CATALOG += [(key, label, item, item, 'oak', 256, 4) for key, label, item in WOODS]
+# Append new types after existing woods: kind IDs are persisted in placed generators
+# and deep chests, so inserting earlier would reinterpret existing machines/reserves.
+CATALOG += [
+    ('sand', 'Arena', 'sand', 'sand', 'stone', 128, 2),
+    ('soul_sand', 'Arena de almas', 'soul_sand', 'soul_sand', 'obsidian', 128, 3),
+    ('blaze_rod', 'Varas de blaze', 'blaze_rod', 'magma_block', 'magma', 256, 3),
+    ('wither_skull', 'Cráneos de esqueleto wither', 'wither_skeleton_skull', 'wither_skeleton_skull', 'soul_sand', 4096, 3),
+]
 BY_KEY = {row[0]: row for row in CATALOG}
 DIMENSIONS = ['minecraft:overworld', 'minecraft:the_nether', 'minecraft:the_end']
 
@@ -352,7 +360,7 @@ for p in PACK.rglob('*.json'):
 for p in PACK.rglob('*.mcfunction'):
     for target in re.findall(r'\bfunction inc:([a-z0-9_/]+)', p.read_text(encoding='utf-8')):
         assert (PACK / f'data/inc/function/{target}.mcfunction').exists(), (p, target)
-assert len(CATALOG) == 33 and len(BY_KEY) == len(CATALOG)
+assert len(CATALOG) == 37 and len(BY_KEY) == len(CATALOG)
 assert all(row[4] in BY_KEY for row in CATALOG)
 if (ROOT / 'README.md').exists():
     write('README.md', (ROOT / 'README.md').read_text(encoding='utf-8'))

@@ -53,12 +53,18 @@ Los precios son fijos; se paga con materiales reales, no con puntuaciones del ju
 | Lana | 64 roble | Lana blanca, que se puede teñir |
 | Hilo | 64 lana | Hilo |
 | Bloque de slime | 256 hilo | Bloque de slime |
+| Arena | 128 piedra | Arena |
+| Arena de almas | 128 obsidiana | Arena de almas |
+| Varas de blaze | 256 bloques de magma | Vara de blaze |
+| Cráneos de esqueleto wither | 4.096 arena de almas | Cráneo de esqueleto wither |
 
 Los otros doce generadores de madera cuestan **256 troncos de roble** cada uno:
 abeto, abedul, jungla, acacia, roble oscuro, mangle, cerezo, roble pálido, álamo,
 carmesí, distorsionada y bambú. Generan el tronco, tallo o bloque de bambú de su
 tipo. Puedes transformarlos en las correspondientes tablas y otras variantes.
-En total hay **33 tipos de generadores**. El cobre está incluido una sola vez.
+En total hay **37 tipos de generadores**. El cobre está incluido una sola vez.
+No hay generadores de pólvora ni huesos: se mantienen como recursos para conseguir
+mediante granjas de mobs.
 
 El generador tiene una base de cristal con un icono giratorio del objeto dentro. Es un bloque
 rompible y permite abrir el cofre inferior. Rompe el cristal para recuperar el generador;
@@ -131,7 +137,7 @@ los diálogos, comprobar las durezas reales y probar la inserción en contenedor
 
 Las pruebas del motor incluyen cofres vacíos, pilas parciales, cofres llenos y objetos
 renombrados, además del formato NBT de los objetos y la normalización del picado.
-Resultado: **327 funciones y 72 tablas de botín/diálogos válidos, sin errores**.
+Resultado: **351 funciones y 80 tablas de botín/diálogos válidos, sin errores**.
 También se comprueba que la reserva conserva componentes de herramientas encantadas
 y dañadas y el contenido de cajas de shulker, respetando pilas de 64, 16 y 1.
 No sustituyen una prueba de juego de colocación, tolvas, recuperación

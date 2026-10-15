@@ -33,5 +33,9 @@ execute if data storage inc:runtime {probe:{id:"minecraft:poplar_log"}} run func
 execute if data storage inc:runtime {probe:{id:"minecraft:crimson_stem"}} run function inc:vault/canonical/crimson
 execute if data storage inc:runtime {probe:{id:"minecraft:warped_stem"}} run function inc:vault/canonical/warped
 execute if data storage inc:runtime {probe:{id:"minecraft:bamboo_block"}} run function inc:vault/canonical/bamboo
+execute if data storage inc:runtime {probe:{id:"minecraft:sand"}} run function inc:vault/canonical/sand
+execute if data storage inc:runtime {probe:{id:"minecraft:soul_sand"}} run function inc:vault/canonical/soul_sand
+execute if data storage inc:runtime {probe:{id:"minecraft:blaze_rod"}} run function inc:vault/canonical/blaze_rod
+execute if data storage inc:runtime {probe:{id:"minecraft:wither_skeleton_skull"}} run function inc:vault/canonical/wither_skull
 execute store result storage inc:runtime maximum int 1 run scoreboard players get @s inc.stack
 function inc:vault/write_prototype with storage inc:runtime

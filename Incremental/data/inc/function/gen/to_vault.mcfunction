@@ -31,4 +31,8 @@ execute if score #kind inc.tmp matches 29 run data modify storage inc:runtime ge
 execute if score #kind inc.tmp matches 30 run data modify storage inc:runtime generated set value {id:"minecraft:crimson_stem"}
 execute if score #kind inc.tmp matches 31 run data modify storage inc:runtime generated set value {id:"minecraft:warped_stem"}
 execute if score #kind inc.tmp matches 32 run data modify storage inc:runtime generated set value {id:"minecraft:bamboo_block"}
+execute if score #kind inc.tmp matches 33 run data modify storage inc:runtime generated set value {id:"minecraft:sand"}
+execute if score #kind inc.tmp matches 34 run data modify storage inc:runtime generated set value {id:"minecraft:soul_sand"}
+execute if score #kind inc.tmp matches 35 run data modify storage inc:runtime generated set value {id:"minecraft:blaze_rod"}
+execute if score #kind inc.tmp matches 36 run data modify storage inc:runtime generated set value {id:"minecraft:wither_skeleton_skull"}
 execute as @e[type=minecraft:armor_stand,tag=inc.vault,distance=..0.1,limit=1] run function inc:vault/accept
