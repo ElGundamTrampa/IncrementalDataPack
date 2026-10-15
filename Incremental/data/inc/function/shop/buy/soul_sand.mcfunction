@@ -14,4 +14,4 @@ scoreboard players operation #due inc.tmp -= @s inc.amount
 execute if score #due inc.tmp matches 1.. run scoreboard players operation @e[type=minecraft:armor_stand,tag=inc.vault,scores={inc.kind=12},distance=..8,sort=nearest,limit=1] inc.buf -= #due inc.tmp
 execute as @e[type=minecraft:armor_stand,tag=inc.vault,scores={inc.kind=12},distance=..8,sort=nearest,limit=1] at @s if block ~ ~ ~ minecraft:chest run function inc:vault/tick
 loot give @s loot inc:tokens/gen/soul_sand
-tellraw @s {"text":"Generador comprado. Colócalo sobre un cofre, agachado.","color":"green"}
+tellraw @s {"text":"Generador comprado. Colócalo sobre un cofre o una tolva, agachado.","color":"green"}

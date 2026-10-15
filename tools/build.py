@@ -87,13 +87,14 @@ def token_loot(name, components):
         {'rolls': 1, 'entries': [{'type': 'minecraft:item', 'name': 'minecraft:armor_stand',
             'modifier': {'type': 'minecraft:set_components', 'components': components}}]}]}))
 
-write('pack.mcmeta', js({'pack': {'description': 'Incremental físico · Java 26.3 · v1.1.0',
+write('pack.mcmeta', js({'pack': {'description': 'Incremental físico · Java 26.3 · v1.1.1',
                                 'min_format': [121, 0], 'max_format': [121, 0]}}))
 for tag in ['load', 'tick']:
     write(f'data/minecraft/tags/function/{tag}.json', js({'values': [f'inc:{tag}']}))
 for tag in ['pause_screen_additions', 'quick_actions']:
     write(f'data/minecraft/tags/dialog/{tag}.json', js({'values': ['inc:shop/page1']}))
 write('data/inc/tags/block/chests.json', js({'values': ['minecraft:chest', 'minecraft:trapped_chest']}))
+write('data/inc/tags/block/generator_outputs.json', js({'values': ['#inc:chests', 'minecraft:hopper']}))
 # Deep chests drop their restorable token through our controller. Suppress only the
 # ordinary chest drop for this exact custom component to avoid producing two chests.
 write('data/minecraft/loot_table/blocks/chest.json', js({'type': 'minecraft:block', 'pools': [{
@@ -177,7 +178,7 @@ for key, label, item, block, currency, price, page in CATALOG:
     write(f'data/inc/loot_table/output/{key}.json', js({'type': 'minecraft:generic', 'pools': [
         {'rolls': 1, 'entries': [{'type': 'minecraft:item', 'name': 'minecraft:' + item}]}]}))
     purchase('shop/buy/' + key, BY_KEY[currency][2], price, 'tokens/gen/' + key,
-             'Generador comprado. Colócalo sobre un cofre, agachado.')
+             'Generador comprado. Colócalo sobre un cofre o una tolva, agachado.')
 token_loot('tokens/vault', token('vault', 'Cofre profundo'))
 purchase('shop/vault', 'iron_ingot', 64, 'tokens/vault', 'Cofre profundo comprado. Colócalo en el suelo, agachado.')
 
@@ -188,8 +189,8 @@ fn('entity/cleanup', ['scoreboard players operation #id inc.tmp = @s inc.id',
 # The item places an invisible armor stand. Its exact placement avoids guessing the
 # target with a raycast or overwriting another player's nearby block.
 fn('gen/new', ['function inc:entity/id'] + [f'execute if entity @s[tag=inc.type.{key}] run scoreboard players set @s inc.kind {i}' for i, (key, *_) in enumerate(CATALOG)] +
-    ['execute if block ~ ~ ~ #inc:chests align xyz positioned ~0.5 ~1 ~0.5 run return run function inc:gen/place',
-     'execute if block ~ ~-1 ~ #inc:chests align xyz positioned ~0.5 ~ ~0.5 run return run function inc:gen/place',
+    ['execute if block ~ ~ ~ #inc:generator_outputs align xyz positioned ~0.5 ~1 ~0.5 run return run function inc:gen/place',
+     'execute if block ~ ~-1 ~ #inc:generator_outputs align xyz positioned ~0.5 ~ ~0.5 run return run function inc:gen/place',
      'function inc:gen/refund'])
 # Native armor stand placement can put its feet on the lid, Y + 0.875.
 # Snap both the execution position and entity to the block above the chest.
@@ -207,9 +208,26 @@ fn('gen/upgrade_visual', ['function inc:entity/cleanup', 'scoreboard players ope
 fn('gen/refund', [f'execute if score @s inc.kind matches {i} run loot spawn ~ ~ ~ loot inc:tokens/gen/{key}' for i, (key, *_) in enumerate(CATALOG)] +
     ['function inc:entity/cleanup', 'kill @s'])
 fn('gen/tick', ['execute unless entity @s[tag=inc.visual2] run function inc:gen/upgrade_visual', 'execute unless block ~ ~ ~ minecraft:glass run return run function inc:gen/refund',
-    'execute unless block ~ ~-1 ~ #inc:chests run return 0', 'scoreboard players operation #kind inc.tmp = @s inc.kind',
+    'execute unless block ~ ~-1 ~ #inc:generator_outputs run return 0', 'scoreboard players operation #kind inc.tmp = @s inc.kind',
     'execute positioned ~ ~-1 ~ if entity @e[type=minecraft:armor_stand,tag=inc.vault,distance=..0.1] run return run function inc:gen/to_vault'] +
-    [f'execute if score @s inc.kind matches {i} run loot insert ~ ~-1 ~ loot inc:output/{key}' for i, (key, *_) in enumerate(CATALOG)])
+    [f'execute if score @s inc.kind matches {i} run function inc:gen/output/{key}' for i, (key, *_) in enumerate(CATALOG)])
+for key, *_ in CATALOG:
+    fn('gen/output/' + key, [f'data modify storage inc:runtime output set value "{key}"',
+        'execute positioned ~ ~-1 ~ run function inc:gen/insert with storage inc:runtime'])
+# /loot insert can report success for a full matching stack without inserting it.
+# Compare actual inventory data so a double chest never gains two items per cycle.
+insert = ['data modify storage inc:runtime before set from block ~ ~ ~ Items',
+    '$loot insert ~ ~ ~ loot inc:output/$(output)',
+    'execute store success score @s inc.tmp run data modify storage inc:runtime before set from block ~ ~ ~ Items',
+    'execute if score @s inc.tmp matches 1 run return 1']
+clockwise = {'north': (1, 0), 'east': (0, 1), 'south': (-1, 0), 'west': (0, -1)}
+for block in ['chest', 'trapped_chest']:
+    for facing, (dx, dz) in clockwise.items():
+        for half, sign, partner in [('left', 1, 'right'), ('right', -1, 'left')]:
+            x, z = dx * sign, dz * sign
+            insert.append(f'execute if block ~ ~ ~ minecraft:{block}[facing={facing},type={half}] positioned ~{x} ~ ~{z} if block ~ ~ ~ minecraft:{block}[facing={facing},type={partner}] run return run function inc:gen/insert_partner with storage inc:runtime')
+fn('gen/insert', insert)
+fn('gen/insert_partner', ['$loot insert ~ ~ ~ loot inc:output/$(output)'])
 fn('gen/to_vault', [f'execute if score #kind inc.tmp matches {i} run data modify storage inc:runtime generated set value {{id:"minecraft:{item}"}}' for i, (_, _, item, *_) in enumerate(CATALOG)] + ['execute as @e[type=minecraft:armor_stand,tag=inc.vault,distance=..0.1,limit=1] run function inc:vault/accept'])
 fn('vault/accept', ['function inc:vault/collect',
     'execute unless data storage inc:runtime prototype run function inc:vault/bind_generated',

@@ -36,9 +36,30 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 
 /** Parse functions with the locally installed game's actual command dispatcher. */
 public class Validate {
+    private static int total(Container container) {
+        int total = 0;
+        for (int i = 0; i < container.getContainerSize(); i++) total += container.getItem(i).getCount();
+        return total;
+    }
+
+    private static boolean insertChanged(java.lang.reflect.Method insert, Container container, ItemStack item) throws Exception {
+        var before = new ArrayList<ItemStack>();
+        for (int i = 0; i < container.getContainerSize(); i++) before.add(container.getItem(i).copy());
+        insert.invoke(null, container, item);
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            var old = before.get(i);
+            var current = container.getItem(i);
+            if (old.getCount() != current.getCount() || !ItemStack.isSameItemSameComponents(old, current)) return true;
+        }
+        return false;
+    }
+
     public static void main(String[] args) throws Exception {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
@@ -78,6 +99,7 @@ public class Validate {
                     params.putInt("left", 32);
                     params.putInt("total", 256);
                     params.putInt("maximum", 64);
+                    params.putString("output", "dirt");
                     params.put("stack", TagParser.parseCompoundFully("{id:\"minecraft:dirt\",count:64}"));
                     fn.instantiate(params, commands.getDispatcher());
                     count++;
@@ -159,6 +181,48 @@ public class Validate {
         insert.invoke(null, chest, new ItemStack(Items.DIRT, 1));
         if (chest.getItem(0).getCount() != 32 || chest.getItem(1).getCount() != 1)
             throw new AssertionError("A special stack was overwritten");
+        // Run the same first-half/partner fallback decision with the game's actual
+        // insertion routine, including its misleading success result for full stacks.
+        for (int scenario = 0; scenario < 5; scenario++) {
+            var primary = new SimpleContainer(27);
+            var partner = new SimpleContainer(27);
+            if (scenario <= 2 || scenario == 4)
+                for (int i = 0; i < 27; i++) primary.setItem(i, new ItemStack(scenario == 4 ? Items.STONE : Items.DIRT, 64));
+            if (scenario == 1 || scenario == 2)
+                for (int i = 0; i < 27; i++) partner.setItem(i, new ItemStack(Items.DIRT, 64));
+            if (scenario == 1) primary.setItem(12, new ItemStack(Items.DIRT, 63));
+            int before = total(primary) + total(partner);
+            if (!insertChanged(insert, primary, new ItemStack(Items.DIRT, 1)))
+                insertChanged(insert, partner, new ItemStack(Items.DIRT, 1));
+            int expected = scenario == 2 ? 0 : 1;
+            if (total(primary) + total(partner) - before != expected)
+                throw new AssertionError("Double chest lost or duplicated output in scenario " + scenario);
+        }
+        var routing = Files.readString(base.resolve("gen/insert.mcfunction"));
+        var routePattern = java.util.regex.Pattern.compile("execute if block ~ ~ ~ minecraft:(chest|trapped_chest)\\[facing=(north|east|south|west),type=(left|right)\\] positioned ~(-?\\d+) ~ ~(-?\\d+) if block ~ ~ ~ minecraft:(chest|trapped_chest)\\[facing=(north|east|south|west),type=(left|right)\\]");
+        var routes = routePattern.matcher(routing);
+        int routeCount = 0;
+        while (routes.find()) {
+            var block = routes.group(1).equals("chest") ? Blocks.CHEST : Blocks.TRAPPED_CHEST;
+            var facing = Direction.valueOf(routes.group(2).toUpperCase(Locale.ROOT));
+            var half = ChestType.valueOf(routes.group(3).toUpperCase(Locale.ROOT));
+            var state = block.defaultBlockState().setValue(ChestBlock.FACING, facing).setValue(ChestBlock.TYPE, half);
+            var direction = ChestBlock.getConnectedDirection(state);
+            if (direction.getStepX() != Integer.parseInt(routes.group(4)) || direction.getStepZ() != Integer.parseInt(routes.group(5)) || !routes.group(1).equals(routes.group(6)) || !routes.group(2).equals(routes.group(7)) || routes.group(3).equals(routes.group(8)))
+                throw new AssertionError("Wrong partner routing: " + routes.group());
+            routeCount++;
+        }
+        if (routeCount != 16) throw new AssertionError("Missing double-chest routing cases: " + routeCount);
+        var hopper = new HopperBlockEntity(BlockPos.ZERO, Blocks.HOPPER.defaultBlockState());
+        if (hopper.getContainerSize() != 5 || !insertChanged(insert, hopper, new ItemStack(Items.DIRT, 1)) || total(hopper) != 1)
+            throw new AssertionError("Hopper insertion failed");
+        for (int i = 0; i < 5; i++) hopper.setItem(i, new ItemStack(Items.DIRT, 64));
+        if (insertChanged(insert, hopper, new ItemStack(Items.DIRT, 1)) || total(hopper) != 320)
+            throw new AssertionError("Full hopper contents changed");
+        hopper.removeItem(4, 1);
+        if (!insertChanged(insert, hopper, new ItemStack(Items.DIRT, 1)) || total(hopper) != 320)
+            throw new AssertionError("Hopper did not resume after freeing space");
+        System.out.println("OUTPUTS: double-chest overflow/full/no-duplication, all 16 partner routes, hopper insertion/full/resume passed");
         if (Blocks.GLASS.defaultBlockState().isRedstoneConductor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO))
             throw new AssertionError("Generator glass would obstruct the chest");
         var itemData = (CompoundTag)ItemStack.CODEC.encodeStart(RegistryOps.create(NbtOps.INSTANCE, registries), new ItemStack(Items.DIRT, 32)).getOrThrow();

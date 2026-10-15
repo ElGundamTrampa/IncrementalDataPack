@@ -1,4 +1,4 @@
-# Incremental  — Java 26.3 · v1.1.0
+# Incremental  — Java 26.3 · v1.1.1
 
 Generadores físicos que depositan objetos reales en el cofre de debajo. El menú se
 utiliza únicamente como tienda: no hay clicker, reservas personales ni barra permanente.
@@ -71,8 +71,9 @@ rompible y permite abrir el cofre inferior. Rompe el cristal para recuperar el g
 su objeto aparece en hasta un segundo. Si lo colocas fuera de un cofre, se devuelve.
 Si quitas el cofre inferior, el generador se pausa hasta que pongas otro.
 
-Funcionan sobre cofres normales, cofres trampa y cofres profundos. Con un cofre doble
-llenan la mitad situada directamente debajo. Un cofre normal lleno detiene la producción:
+Funcionan sobre cofres normales, cofres trampa, cofres profundos y tolvas. Con un cofre
+doble llenan primero la mitad situada debajo y después la otra, en cualquier orientación.
+La producción sigue siendo un objeto por segundo en total. Un contenedor lleno detiene la producción:
 no sustituye sus objetos ni tira la producción al suelo. Las máquinas funcionan mientras
 sus chunks estén cargados y el mundo avance, incluso si su comprador no está conectado.
 
@@ -137,7 +138,7 @@ los diálogos, comprobar las durezas reales y probar la inserción en contenedor
 
 Las pruebas del motor incluyen cofres vacíos, pilas parciales, cofres llenos y objetos
 renombrados, además del formato NBT de los objetos y la normalización del picado.
-Resultado: **351 funciones y 80 tablas de botín/diálogos válidos, sin errores**.
+Resultado: **390 funciones y 80 tablas de botín/diálogos válidos, sin errores**.
 También se comprueba que la reserva conserva componentes de herramientas encantadas
 y dañadas y el contenido de cajas de shulker, respetando pilas de 64, 16 y 1.
 No sustituyen una prueba de juego de colocación, tolvas, recuperación
@@ -152,6 +153,11 @@ La versión 1.1.0 actualiza automáticamente los iconos de los generadores al ca
 chunks y conserva las reservas de los cofres existentes. Los cofres ya colocados conservan
 su orientación; los nuevos y los recuperados se orientan al colocarlos. La lista de tamaños
 de pila en `tools/stack_sizes.json` procede del registro de objetos del motor 26.3.
+
+La versión 1.1.1 permite producir directamente en tolvas y llenar las dos mitades de
+un cofre doble normal o trampa. Si ambas mitades están llenas, no se generan objetos
+pendientes ni se tiran al suelo. Al liberar espacio, la producción continúa. La señal
+de redstone de una tolva sigue controlando su transferencia normal de objetos.
 
 Los diálogos nativos y el formato del pack se documentan en las notas oficiales de
 [Java 1.21.6](https://www.minecraft.net/en-us/article/minecraft-java-edition-1-21-6) y

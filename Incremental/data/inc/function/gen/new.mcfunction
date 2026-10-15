@@ -36,6 +36,6 @@ execute if entity @s[tag=inc.type.sand] run scoreboard players set @s inc.kind 3
 execute if entity @s[tag=inc.type.soul_sand] run scoreboard players set @s inc.kind 34
 execute if entity @s[tag=inc.type.blaze_rod] run scoreboard players set @s inc.kind 35
 execute if entity @s[tag=inc.type.wither_skull] run scoreboard players set @s inc.kind 36
-execute if block ~ ~ ~ #inc:chests align xyz positioned ~0.5 ~1 ~0.5 run return run function inc:gen/place
-execute if block ~ ~-1 ~ #inc:chests align xyz positioned ~0.5 ~ ~0.5 run return run function inc:gen/place
+execute if block ~ ~ ~ #inc:generator_outputs align xyz positioned ~0.5 ~1 ~0.5 run return run function inc:gen/place
+execute if block ~ ~-1 ~ #inc:generator_outputs align xyz positioned ~0.5 ~ ~0.5 run return run function inc:gen/place
 function inc:gen/refund
